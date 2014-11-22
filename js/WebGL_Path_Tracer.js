@@ -24,17 +24,12 @@
     var shaderProgram;
     var angleX = 0;
     var angleY = 0;
-    var zoomZ = 5.5;
+    var zoomZ = 10.5;
 
     var eye = { x: 0.0, y: 0.0, z: 0.0 };
     var center = { x: 0.0, y: 0.0, z: 0.0 };
     var up = { x: 0.0, y: 1.0, z: 0.0 };
     var FOVY = 45.0;
-    var FOVX = 0.0;
-
-    var yscaled = Math.tan(FOVY * (Math.PI / 180.0));
-    var xscaled = (yscaled * canvas.width) / canvas.height;
-    FOVX = (Math.atan(xscaled) * 180.0) / Math.PI;
 
     eye.x = zoomZ * Math.sin(angleY) * Math.cos(angleX);
     eye.y = zoomZ * Math.sin(angleX);
@@ -46,8 +41,19 @@
     var u_vInvMPLocation;
 
     //Fragment Shader
+    var currobjnum = 0;
+    var maxobjnum = 10;
     var u_eyeLocation;
     var u_timeLocation;
+    var u_objnumsLocation;
+    var u_objcolorsLocation = [];
+    var u_objtypesLocation = []; //type, textureType
+    var u_objmat1Location = []; //reflective,refractive,reflectivity
+    var u_objmat2Location = []; //indexOfRefraction,subsurfaceScatter, emittance
+    var u_objmodelviewLocation = [];
+    var u_objinvmodelviewLocation = [];
+    var u_objinvtransmodelviewLocation = [];
+
 
     //Added
     var stats;
@@ -66,6 +72,20 @@
         u_veyeLocation = gl.getUniformLocation(shaderProgram, "vcameraPos");
         u_vInvMPLocation = gl.getUniformLocation(shaderProgram, "u_vInvMP");
 
+
+        //uniforms for objects
+        u_objnumsLocation = gl.getUniformLocation(shaderProgram, "u_objnums");
+
+        for (var i = 0; i < maxobjnum; i++) {
+            u_objcolorsLocation.push(gl.getUniformLocation(shaderProgram, "u_objcolors[" + i.toString(10) + "]"));
+            u_objtypesLocation.push(gl.getUniformLocation(shaderProgram, "u_objtypes[" + i.toString(10) + "]"));
+            u_objmat1Location.push(gl.getUniformLocation(shaderProgram, "u_objmat1[" + i.toString(10) + "]"));
+            u_objmat2Location.push(gl.getUniformLocation(shaderProgram, "u_objmat2[" + i.toString(10) + "]"));
+            u_objmodelviewLocation.push(gl.getUniformLocation(shaderProgram, "u_objmodelview[" + i.toString(10) + "]"));
+            u_objinvmodelviewLocation.push(gl.getUniformLocation(shaderProgram, "u_objinvmodelview[" + i.toString(10) + "]"));
+            u_objinvtransmodelviewLocation.push(gl.getUniformLocation(shaderProgram, "u_objinvtransmodelview[" + i.toString(10) + "]"));
+        }
+
         //Fragment Shader
         u_eyeLocation = gl.getUniformLocation(shaderProgram, "cameraPos");
         u_timeLocation = gl.getUniformLocation(shaderProgram, "time");
@@ -73,6 +93,105 @@
         gl.useProgram(shaderProgram);
     })();
 
+    var Datas = [{
+        obj_pos: [0, 0, 0],
+        obj_scale: [1, 1, 1],
+        obj_rotation: [0, 0, 0],
+        obj_color: [0, 0, 0],
+        obj_type: 0,
+        obj_textureType: 0,
+        obj_reflective: 0,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 0,
+        obj_subsurfaceScatter: 0
+    }];
+
+
+    (function DefaultScene() {
+        var DefaultDatas = [];
+
+        //Sphere
+        Datas[0].obj_pos = [-1.0, 1.0, 0.0];
+        Datas[0].obj_scale = [1.3, 1.3, 1.3];
+        Datas[0].obj_rotation = [0.0, 0.0, 0.0];
+        Datas[0].obj_color = [0.8, 0.0, 0.0];
+        Datas[0].obj_type = 0;
+        Datas[0].obj_textureType = 0;
+        Datas[0].obj_reflective = 0;
+        Datas[0].obj_refractive = 0;
+        Datas[0].obj_reflectivity = 1.0;
+        Datas[0].obj_indexOfRefraction = 1.0;
+        Datas[0].obj_emittance = 0;
+        Datas[0].obj_subsurfaceScatter = 0;
+
+        DefaultDatas.push(Datas[0]);
+
+        //Light
+        Datas.push({
+            obj_pos: [0.0, 0.0, 0.0],
+            obj_scale: [0.8, 0.8, 0.8],
+            obj_rotation: [0.0, 0.0, 0.0],
+            obj_color: [1.0, 1.0, 1.0],
+            obj_type: 0,
+            obj_textureType: 0,
+            obj_reflective: 0,
+            obj_refractive: 0,
+            obj_reflectivity: 1.0,
+            obj_indexOfRefraction: 1.0,
+            obj_emittance: 1,
+            obj_subsurfaceScatter: 0
+        });
+        DefaultDatas.push(Datas[1]);
+
+
+        //Box
+        Datas.push({
+            obj_pos: [2.0, 0.0, 0.0],
+            obj_scale: [0.8, 0.8, 0.8],
+            obj_rotation: [0.0, 0.0, 0.0],
+            obj_color: [0.8, 0.8, 0.8],
+            obj_type: 2,
+            obj_textureType: 0,
+            obj_reflective: 0,
+            obj_refractive: 0,
+            obj_reflectivity: 1.0,
+            obj_indexOfRefraction: 1.0,
+            obj_emittance: 0,
+            obj_subsurfaceScatter: 0
+        });
+        DefaultDatas.push(Datas[2]);
+
+        for (var i = 0; i < DefaultDatas.length ; i++) {
+            gl.uniform3f(u_objcolorsLocation[i], DefaultDatas[i].obj_color[0], DefaultDatas[i].obj_color[1], DefaultDatas[i].obj_color[1]);
+            gl.uniform2f(u_objtypesLocation[i], DefaultDatas[i].obj_type, DefaultDatas[i].obj_textureType);
+            gl.uniform3f(u_objmat1Location[i], DefaultDatas[i].obj_reflective, DefaultDatas[i].obj_refractive, DefaultDatas[i].obj_reflectivity);
+            gl.uniform3f(u_objmat2Location[i], DefaultDatas[i].obj_indexOfRefraction, DefaultDatas[i].obj_subsurfaceScatter, DefaultDatas[i].obj_emittance);
+
+            var modelv = mat4.create();
+            mat4.identity(modelv);
+            var objtrans = mat4.create();
+            var translatev = DefaultDatas[i].obj_pos;
+            mat4.translate(modelv, translatev, objtrans);
+            var rotangle = DefaultDatas[i].obj_rotation;
+            mat4.rotate(objtrans, rotangle[0] * Math.PI / 180.0, [1.0, 0.0, 0.0], objtrans);
+            mat4.rotate(objtrans, rotangle[1] * Math.PI / 180.0, [0.0, 1.0, 0.0], objtrans);
+            mat4.rotate(objtrans, rotangle[2] * Math.PI / 180.0, [0.0, 0.0, 1.0], objtrans);
+            var scalev = DefaultDatas[i].obj_scale;
+            mat4.scale(objtrans, scalev, objtrans);
+
+            var inversmodelv = mat4.create();
+            mat4.inverse(objtrans, inversmodelv);
+
+            var transinversmodelv = mat4.create();
+            mat4.transpose(inversmodelv, transinversmodelv);
+
+            gl.uniformMatrix4fv(u_objmodelviewLocation[i], false, objtrans);
+            gl.uniformMatrix4fv(u_objinvmodelviewLocation[i], false, inversmodelv);
+            gl.uniformMatrix4fv(u_objinvtransmodelviewLocation[i], false, transinversmodelv);
+        }
+    })();
 
 
     (function initBuffers() {
@@ -135,7 +254,7 @@
         }
         else {
             zoomZ += 0.01 * deltaY;
-            zoomZ = Math.min(Math.max(zoomZ, 2.5), 10.0);
+            zoomZ = Math.min(Math.max(zoomZ, 5.5), 20.0);
         }
 
         eye.x = zoomZ * Math.sin(angleY) * Math.cos(angleX);
@@ -186,9 +305,9 @@
         // Render
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        var modelview = mat4.create();    
+        var modelview = mat4.create();
         mat4.lookAt([eye.x, eye.y, eye.z], [center.x, center.y, center.z], [up.x, up.y, up.z], modelview);
-        
+
         var projection = mat4.create();
         mat4.perspective(FOVY, canvas.width / canvas.height, 0.1, 100.0, projection);
 
@@ -197,7 +316,37 @@
 
         var inversemp = mat4.create();
         mat4.inverse(modelviewprojection, inversemp);
-       
+
+        //        for (var i = 0; i < 1; i++) {
+        //            gl.uniform3f(u_objcolorsLocation[i], 1.0, 0.0, 0.0);
+        //            gl.uniform2f(u_objtypesLocation[i], 1.0, 0.0);
+        //            gl.uniform3f(u_objmat1Location[i], 0.0, 0.0, 0.0);
+        //            gl.uniform3f(u_objmat2Location[i], 1.0, 0.0, 0.0);
+
+        //            var modelv = mat4.create();
+        //            mat4.identity(modelv);
+        //            var objtrans = mat4.create();
+        //            var translatev = [-1.0, 1.0, 0.0];
+        //            mat4.translate(modelv, translatev, objtrans);
+        //            var rotangle = [0.0, 0.0, 0.0];
+        //            mat4.rotate(objtrans, rotangle[0] * Math.PI / 180.0, [1.0, 0.0, 0.0], objtrans);
+        //            mat4.rotate(objtrans, rotangle[1] * Math.PI / 180.0, [0.0, 1.0, 0.0], objtrans);
+        //            mat4.rotate(objtrans, rotangle[2] * Math.PI / 180.0, [0.0, 0.0, 1.0], objtrans);
+        //            var scalev = [2.3, 2.3, 2.3];
+        //            mat4.scale(objtrans, scalev, objtrans);
+
+        //            var inversmodelv = mat4.create();
+        //            mat4.inverse(objtrans, inversmodelv);
+
+        //            var transinversmodelv = mat4.create();
+        //            mat4.transpose(inversmodelv, transinversmodelv);
+
+        //            gl.uniformMatrix4fv(u_objmodelviewLocation[i], false, objtrans);
+        //            gl.uniformMatrix4fv(u_objinvmodelviewLocation[i], false, inversmodelv);
+        //            gl.uniformMatrix4fv(u_objinvtransmodelviewLocation[i], false, transinversmodelv);
+        //        }
+
+
         gl.uniformMatrix4fv(u_vInvMPLocation, false, inversemp);
         gl.uniform3f(u_veyeLocation, eye.x, eye.y, eye.z);
         gl.uniform3f(u_eyeLocation, eye.x, eye.y, eye.z);
