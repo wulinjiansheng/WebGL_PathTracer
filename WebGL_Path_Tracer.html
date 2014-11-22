@@ -15,11 +15,9 @@
 precision highp float;
 
 attribute vec2 aVertex;
-attribute vec3 aPixel;
 uniform vec3 vcameraPos;
 uniform mat4 u_vInvMP;
 
-varying vec3 vPosition;
 varying vec3 InitRay;
 
 void main(void)
@@ -31,7 +29,6 @@ void main(void)
     vec3 ray10 = ((u_vInvMP* vec4(1.0, -1.0, 0.0, 1.0))/(u_vInvMP* vec4(-1.0, -1.0, 0.0, 1.0)).w).xyz - vcameraPos;
     vec3 ray11 = ((u_vInvMP* vec4(1.0, 1.0, 0.0, 1.0))/(u_vInvMP* vec4(-1.0, -1.0, 0.0, 1.0)).w).xyz - vcameraPos;
     InitRay = mix(mix(ray00, ray01, percent.y), mix(ray10, ray11, percent.y), percent.x);
-    vPosition = aPixel;
 }
 
 </script>
@@ -41,7 +38,6 @@ precision highp float;
 uniform float time;
 uniform vec3 cameraPos;
 
-varying vec3 vPosition;
 varying vec3 InitRay;
 
 struct RAY{
@@ -87,14 +83,14 @@ float sphereRad = 1.0;
 
 
 void initializeGeometry(){
-	geomList[0].pos = vec3(-2.0,1.0,-1.0);
+	geomList[0].pos = vec3(-2.0,1.0,0.0);
 	geomList[0].color = vec3(1,0,0);
 	geomList[0].type = 0 ;//sphere
 	geomList[0].reflective = 1;//not reflective
 	geomList[0].refractive = 0;//not refractive
 	geomList[0].indexOfRefraction = 1.09;
 	geomList[0].emittance = 0;
-	geomList[0].radius = 1.0;
+	geomList[0].radius = 0.3;
 	geomList[0].subsurfaceScatter = 1;
 	geomList[0].reflectivity = 0.2;
     		
@@ -112,7 +108,7 @@ void initializeGeometry(){
     
     
     //box
-    geomList[2].pos = vec3(0.0,1.0,-1.0);
+    geomList[2].pos = vec3(0.0,1.0,0.0);
     geomList[2].color = vec3(0,1,0);
     geomList[2].type = 2;//cube
     geomList[2].reflective = 0;//not reflective
@@ -289,7 +285,7 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
 
 
 float random(vec3 noise, float seed) {
-	return fract(sin(dot(vPosition + seed, noise)) * 43758.5453 + seed);
+	return fract(sin(dot(InitRay + seed, noise)) * 43758.5453 + seed);
 }
 	
 	
@@ -361,10 +357,9 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
 void main(void)
 {
 	initializeGeometry();
-	vec3 cameraDir = normalize(vPosition - cameraPos);  
 	RAY r;
 	r.origin = cameraPos;
-	r.dir = normalize(InitRay);//cameraDir;
+	r.dir = normalize(InitRay);
 	r.IOR = 1.0;		
     r.raycolor = vec3(1.0,1.0,1.0);
 
@@ -376,7 +371,6 @@ void main(void)
 </script>
 
 <script src ="js/lib/gl-matrix.js" type ="text/javascript"></script>
-<!--<script src="js/lib/sylvester.src.js" type="text/javascript"></script>-->
 <script src ="js/webGLUtility.js" type ="text/javascript"></script>
 <script src ="js/WebGL_Path_Tracer.js" type ="text/javascript"></script>
 <script src="js/lib/dat.gui.min.js" type="text/javascript"></script>
