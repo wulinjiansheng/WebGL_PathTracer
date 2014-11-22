@@ -43,9 +43,9 @@
     //Fragment Shader
     var currobjnum = 0;
     var maxobjnum = 10;
+    var u_numsLocation;
     var u_eyeLocation;
     var u_timeLocation;
-    var u_objnumsLocation;
     var u_objcolorsLocation = [];
     var u_objtypesLocation = []; //type, textureType
     var u_objmat1Location = []; //reflective,refractive,reflectivity
@@ -72,10 +72,13 @@
         u_veyeLocation = gl.getUniformLocation(shaderProgram, "vcameraPos");
         u_vInvMPLocation = gl.getUniformLocation(shaderProgram, "u_vInvMP");
 
+        //Fragment Shader        
+        u_timeLocation = gl.getUniformLocation(shaderProgram, "time");
+        //Don't k why this line doesn't work
+        u_numsLocation = gl.getUniformLocation(shaderProgram, "objnums");
+        u_eyeLocation = gl.getUniformLocation(shaderProgram, "cameraPos");
 
         //uniforms for objects
-        u_objnumsLocation = gl.getUniformLocation(shaderProgram, "u_objnums");
-
         for (var i = 0; i < maxobjnum; i++) {
             u_objcolorsLocation.push(gl.getUniformLocation(shaderProgram, "u_objcolors[" + i.toString(10) + "]"));
             u_objtypesLocation.push(gl.getUniformLocation(shaderProgram, "u_objtypes[" + i.toString(10) + "]"));
@@ -86,55 +89,128 @@
             u_objinvtransmodelviewLocation.push(gl.getUniformLocation(shaderProgram, "u_objinvtransmodelview[" + i.toString(10) + "]"));
         }
 
-        //Fragment Shader
-        u_eyeLocation = gl.getUniformLocation(shaderProgram, "cameraPos");
-        u_timeLocation = gl.getUniformLocation(shaderProgram, "time");
 
         gl.useProgram(shaderProgram);
     })();
 
-    var Datas = [{
-        obj_pos: [0, 0, 0],
-        obj_scale: [1, 1, 1],
-        obj_rotation: [0, 0, 0],
-        obj_color: [0, 0, 0],
-        obj_type: 0,
-        obj_textureType: 0,
-        obj_reflective: 0,
-        obj_refractive: 0,
-        obj_reflectivity: 1.0,
-        obj_indexOfRefraction: 1.0,
-        obj_emittance: 0,
-        obj_subsurfaceScatter: 0
-    }];
+    var Datas = [];
 
 
     (function DefaultScene() {
         var DefaultDatas = [];
+        //Walls
+        var WallScale = 10.0;
+        var WallTrans = 5.0;
+        Datas.push({
+            obj_pos: [0.0, 0.0, -WallTrans],
+            obj_scale: [WallScale, WallScale, 0.1],
+            obj_rotation: [0.0, 0.0, 0.0],
+            obj_color: [0.0, 1.0, 0.0],
+            obj_type: 2,
+            obj_textureType: 0,
+            obj_reflective: 0,
+            obj_refractive: 0,
+            obj_reflectivity: 1.0,
+            obj_indexOfRefraction: 1.0,
+            obj_emittance: 0,
+            obj_subsurfaceScatter: 0
+        });
+        DefaultDatas.push(Datas[currobjnum++]);
+
+        //Walls
+        Datas.push({
+            obj_pos: [WallTrans, 0.0, 0.0],
+            obj_scale: [0.1, WallScale, WallScale],
+            obj_rotation: [0.0, 0.0, 0.0],
+            obj_color: [1.0, 1.0, 0.0],
+            obj_type: 2,
+            obj_textureType: 0,
+            obj_reflective: 0,
+            obj_refractive: 0,
+            obj_reflectivity: 1.0,
+            obj_indexOfRefraction: 1.0,
+            obj_emittance: 0,
+            obj_subsurfaceScatter: 0
+        });
+        DefaultDatas.push(Datas[currobjnum++]);
+
+
+        //Walls
+        Datas.push({
+            obj_pos: [-WallTrans, 0.0, 0.0],
+            obj_scale: [0.1, WallScale, WallScale],
+            obj_rotation: [0.0, 0.0, 0.0],
+            obj_color: [1.0, 1.0, 0.0],
+            obj_type: 2,
+            obj_textureType: 0,
+            obj_reflective: 0,
+            obj_refractive: 0,
+            obj_reflectivity: 1.0,
+            obj_indexOfRefraction: 1.0,
+            obj_emittance: 0,
+            obj_subsurfaceScatter: 0
+        });
+        DefaultDatas.push(Datas[currobjnum++]);
+
+        //Walls
+        Datas.push({
+            obj_pos: [0.0, -WallTrans, 0.0],
+            obj_scale: [WallScale, 0.1, WallScale],
+            obj_rotation: [0.0, 0.0, 0.0],
+            obj_color: [0.0, 0.0, 1.0],
+            obj_type: 2,
+            obj_textureType: 0,
+            obj_reflective: 0,
+            obj_refractive: 0,
+            obj_reflectivity: 1.0,
+            obj_indexOfRefraction: 1.0,
+            obj_emittance: 0,
+            obj_subsurfaceScatter: 0
+        });
+        DefaultDatas.push(Datas[currobjnum++]);
+
+
+        //Walls
+        Datas.push({
+            obj_pos: [0.0, WallTrans, 0.0],
+            obj_scale: [WallScale, 0.1, WallScale],
+            obj_rotation: [0.0, 0.0, 0.0],
+            obj_color: [0.0, 0.0, 1.0],
+            obj_type: 2,
+            obj_textureType: 0,
+            obj_reflective: 0,
+            obj_refractive: 0,
+            obj_reflectivity: 1.0,
+            obj_indexOfRefraction: 1.0,
+            obj_emittance: 0,
+            obj_subsurfaceScatter: 0
+        });
+        DefaultDatas.push(Datas[currobjnum++]);
 
         //Sphere
-        Datas[0].obj_pos = [-1.0, 1.0, 0.0];
-        Datas[0].obj_scale = [1.3, 1.3, 1.3];
-        Datas[0].obj_rotation = [0.0, 0.0, 0.0];
-        Datas[0].obj_color = [0.8, 0.0, 0.0];
-        Datas[0].obj_type = 0;
-        Datas[0].obj_textureType = 0;
-        Datas[0].obj_reflective = 0;
-        Datas[0].obj_refractive = 0;
-        Datas[0].obj_reflectivity = 1.0;
-        Datas[0].obj_indexOfRefraction = 1.0;
-        Datas[0].obj_emittance = 0;
-        Datas[0].obj_subsurfaceScatter = 0;
-
-        DefaultDatas.push(Datas[0]);
+        Datas.push({
+            obj_pos: [-1.0, 1.0, 0.0],
+            obj_scale: [1.3, 1.3, 1.3],
+            obj_rotation: [0.0, 0.0, 0.0],
+            obj_color: [0.8, 0.0, 0.0],
+            obj_type: 0,
+            obj_textureType: 0,
+            obj_reflective: 0,
+            obj_refractive: 0,
+            obj_reflectivity: 1.0,
+            obj_indexOfRefraction: 1.0,
+            obj_emittance: 0,
+            obj_subsurfaceScatter: 0
+        });
+        DefaultDatas.push(Datas[currobjnum++]);
 
         //Light
         Datas.push({
-            obj_pos: [0.0, 0.0, 0.0],
-            obj_scale: [0.8, 0.8, 0.8],
+            obj_pos: [0.0,4.95, 0.0],
+            obj_scale: [2.8, 0.1, 1.8],
             obj_rotation: [0.0, 0.0, 0.0],
             obj_color: [1.0, 1.0, 1.0],
-            obj_type: 0,
+            obj_type: 2,
             obj_textureType: 0,
             obj_reflective: 0,
             obj_refractive: 0,
@@ -143,14 +219,14 @@
             obj_emittance: 1,
             obj_subsurfaceScatter: 0
         });
-        DefaultDatas.push(Datas[1]);
+        DefaultDatas.push(Datas[currobjnum++]);
 
 
         //Box
         Datas.push({
             obj_pos: [2.0, 0.0, 0.0],
             obj_scale: [0.8, 0.8, 0.8],
-            obj_rotation: [0.0, 0.0, 0.0],
+            obj_rotation: [40.0, 40.0, 0.0],
             obj_color: [0.8, 0.8, 0.8],
             obj_type: 2,
             obj_textureType: 0,
@@ -161,10 +237,10 @@
             obj_emittance: 0,
             obj_subsurfaceScatter: 0
         });
-        DefaultDatas.push(Datas[2]);
+        DefaultDatas.push(Datas[currobjnum++]);
 
-        for (var i = 0; i < DefaultDatas.length ; i++) {
-            gl.uniform3f(u_objcolorsLocation[i], DefaultDatas[i].obj_color[0], DefaultDatas[i].obj_color[1], DefaultDatas[i].obj_color[1]);
+        for (var i = 0; i < DefaultDatas.length; i++) {
+            gl.uniform3f(u_objcolorsLocation[i], DefaultDatas[i].obj_color[0], DefaultDatas[i].obj_color[1], DefaultDatas[i].obj_color[2]);
             gl.uniform2f(u_objtypesLocation[i], DefaultDatas[i].obj_type, DefaultDatas[i].obj_textureType);
             gl.uniform3f(u_objmat1Location[i], DefaultDatas[i].obj_reflective, DefaultDatas[i].obj_refractive, DefaultDatas[i].obj_reflectivity);
             gl.uniform3f(u_objmat2Location[i], DefaultDatas[i].obj_indexOfRefraction, DefaultDatas[i].obj_subsurfaceScatter, DefaultDatas[i].obj_emittance);
@@ -351,7 +427,7 @@
         gl.uniform3f(u_veyeLocation, eye.x, eye.y, eye.z);
         gl.uniform3f(u_eyeLocation, eye.x, eye.y, eye.z);
         gl.uniform1f(u_timeLocation, time);
-
+        gl.uniform1i(u_numsLocation, currobjnum);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         time += 0.001;
         window.requestAnimFrame(animate);
