@@ -4,7 +4,7 @@
     /*global window,document,Float32Array,Uint16Array,mat4,vec3,snoise*/
     /*global getShaderSource,createWebGLContext,createProgram*/
 
-    /******************************************************utility functions**********************************************************************/
+    //utility functions
     function cross(v1, v2) {
         return { x: v1.y * v2.z - v2.y * v1.z,
             y: v1.z * v2.x - v2.z * v1.x,
@@ -33,6 +33,86 @@
     }
 
 
+    function makeLookAt(ex, ey, ez,
+                    cx, cy, cz,
+                    ux, uy, uz) {
+
+        var eye = $V([ex, ey, ez]);
+        var center = $V([cx, cy, cz]);
+        var up = $V([ux, uy, uz]);
+
+        var mag;
+
+        var z = eye.subtract(center).toUnitVector();
+        var x = up.cross(z).toUnitVector();
+        var y = z.cross(x).toUnitVector();
+
+        var m = $M([[x.e(1), x.e(2), x.e(3), 0],
+                [y.e(1), y.e(2), y.e(3), 0],
+                [z.e(1), z.e(2), z.e(3), 0],
+                [0, 0, 0, 1]]);
+
+        var t = $M([[1, 0, 0, -ex],
+                [0, 1, 0, -ey],
+                [0, 0, 1, -ez],
+                [0, 0, 0, 1]]);
+        return m.x(t);
+    }
+
+
+    function makeOrtho(left, right,
+                   bottom, top,
+                   znear, zfar) {
+        var tx = -(right + left) / (right - left);
+        var ty = -(top + bottom) / (top - bottom);
+        var tz = -(zfar + znear) / (zfar - znear);
+
+        return $M([[2 / (right - left), 0, 0, tx],
+               [0, 2 / (top - bottom), 0, ty],
+               [0, 0, -2 / (zfar - znear), tz],
+               [0, 0, 0, 1]]);
+    }
+
+    function makePerspective(fovy, aspect, znear, zfar) {
+        var ymax = znear * Math.tan(fovy * Math.PI / 360.0);
+        var ymin = -ymax;
+        var xmin = ymin * aspect;
+        var xmax = ymax * aspect;
+
+        return makeFrustum(xmin, xmax, ymin, ymax, znear, zfar);
+    }
+
+
+    function makeFrustum(left, right,
+                     bottom, top,
+                     znear, zfar) {
+        var X = 2 * znear / (right - left);
+        var Y = 2 * znear / (top - bottom);
+        var A = (right + left) / (right - left);
+        var B = (top + bottom) / (top - bottom);
+        var C = -(zfar + znear) / (zfar - znear);
+        var D = -2 * zfar * znear / (zfar - znear);
+
+        return $M([[X, 0, A, 0],
+               [0, Y, B, 0],
+               [0, 0, C, D],
+               [0, 0, -1, 0]]);
+    }
+
+    function makeOrtho(left, right, bottom, top, znear, zfar) {
+        var tx = -(right + left) / (right - left);
+        var ty = -(top + bottom) / (top - bottom);
+        var tz = -(zfar + znear) / (zfar - znear);
+
+        return $M([[2 / (right - left), 0, 0, tx],
+	       [0, 2 / (top - bottom), 0, ty],
+	       [0, 0, -2 / (zfar - znear), tz],
+	       [0, 0, 0, 1]]);
+    }
+
+
+
+    //main
     var message = document.getElementById("message");
     var canvas = document.getElementById("canvas");
     var gl = createWebGLContext(canvas, message);
@@ -71,6 +151,8 @@
     //Vertex Shader
     var VertexLocation;
     var PixelLocation;
+    var u_veyeLocation;
+    var u_vInvMPLocation;
 
     //Fragment Shader
     var u_eyeLocation;
@@ -92,6 +174,9 @@
 
         PixelLocation = gl.getAttribLocation(shaderProgram, "aPixel");
         gl.enableVertexAttribArray(PixelLocation);
+
+        u_veyeLocation = gl.getUniformLocation(shaderProgram, "vcameraPos");
+        u_vInvMPLocation = gl.getUniformLocation(shaderProgram, "u_vInvMP");
 
         //Fragment Shader
         u_eyeLocation = gl.getUniformLocation(shaderProgram, "cameraPos");
@@ -201,6 +286,12 @@
     };
 
 
+
+    function getEyeRay(matrix, x, y) {
+        return matrix.multiply(Vector.create([x, y, 0, 1])).divideByW().ensure3().subtract(eye);
+    }
+
+
     (function animate() {
 
         if (stats)
@@ -239,6 +330,28 @@
         corners.push(topLeft.x, topLeft.y, topLeft.z);
         corners.push(botRight.x, botRight.y, botRight.z);
         corners.push(botLeft.x, botLeft.y, botLeft.z);
+
+        var modelview = mat4.create();
+        var eye3 = [eye.x, eye.y, eye.z];
+        var center3 = [center.x, center.y, center.z];
+        
+        var up3 = [up.x, up.y, up.z];
+        
+        mat4.lookAt(eye3, center3, up3, modelview);
+        
+        var projection = mat4.create();
+        mat4.perspective(FOVY, canvas.width / canvas.height, 0.1, 100.0, projection);
+
+        //var modelview = makeLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);
+        //var projection = makePerspective(FOVY, canvas.width / canvas.height, 0.1, 100);
+        var modelviewprojection = mat4.create();
+        mat4.multiply(projection, modelview, modelviewprojection);
+
+        var inversemp = mat4.create();
+        mat4.inverse(modelviewprojection, inversemp);
+       
+        gl.uniformMatrix4fv(u_vInvMPLocation, false, inversemp);
+        gl.uniform3f(u_veyeLocation, eye.x, eye.y, eye.z);
 
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(corners), gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, pixelBuffer);
