@@ -34,7 +34,9 @@
     eye.x = zoomZ * Math.sin(angleY) * Math.cos(angleX);
     eye.y = zoomZ * Math.sin(angleX);
     eye.z = zoomZ * Math.cos(angleY) * Math.cos(angleX);
-
+	
+	var textures;
+	
     //Vertex Shader
     var VertexLocation;
     var u_veyeLocation;
@@ -46,6 +48,7 @@
     var u_numsLocation;
     var u_eyeLocation;
     var u_timeLocation;
+	var u_itrLocation;
     var u_objcolorsLocation = [];
     var u_objtypesLocation = []; //type, textureType
     var u_objmat1Location = []; //reflective,refractive,reflectivity
@@ -53,15 +56,78 @@
     var u_objmodelviewLocation = [];
     var u_objinvmodelviewLocation = [];
     var u_objinvtransmodelviewLocation = [];
-
+	
+	
+	//render shader
+	var renderProgram;
+	var renderVertexAttribute;
+	var vertexPositionBuffer;
+	var frameBuffer;
 
     //Added
     var stats;
+	
+	(function initBuffers() {
+        vertexPositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+        var vertices = [
+         1.0, 1.0,
+        -1.0, 1.0,
+         1.0, -1.0,
+        -1.0, -1.0,
+        ];
 
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(VertexLocation, 2, gl.FLOAT, false, 0, 0);
+		
+		
+		frameBuffer = gl.createFramebuffer();
+		
+		var type = gl.getExtension('OES_texture_float') ? gl.FLOAT : gl.UNSIGNED_BYTE;
+		
+		textures = [];
+		for(var i = 0; i < 2; i++) {
+			textures.push(gl.createTexture());
+			gl.bindTexture(gl.TEXTURE_2D, textures[i]);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 512, 512, 0, gl.RGB, type, null);
+		}
+		gl.bindTexture(gl.TEXTURE_2D, null);
+		
+		
+		
+    })();
+	
+	function compileSource(source, type) {
+	  var shader = gl.createShader(type);
+	  gl.shaderSource(shader, source);
+	  gl.compileShader(shader);
+	  return shader;
+	}
+
+	function compileShader(vertexSource, fragmentSource) {
+	  var shaderProgram = gl.createProgram();
+	  gl.attachShader(shaderProgram, compileSource(vertexSource, gl.VERTEX_SHADER));
+	  gl.attachShader(shaderProgram, compileSource(fragmentSource, gl.FRAGMENT_SHADER));
+	  gl.linkProgram(shaderProgram);
+	  return shaderProgram;
+	}
 
     (function initializeShader() {
-        var vs = getShaderSource(document.getElementById("vs"));
-        var fs = getShaderSource(document.getElementById("fs"));
+		//create render shader
+		var renderVs = getShaderSource(document.getElementById("vs_render"));
+		var renderFs = getShaderSource(document.getElementById("fs_render"));
+		
+		//renderProgram = compileShader(renderVs, renderFs);
+		renderProgram = createProgram(gl, renderVs, renderFs, message);
+		renderVertexAttribute = gl.getAttribLocation(renderProgram, 'aVertex');
+		gl.enableVertexAttribArray(renderVertexAttribute);
+		
+		
+		//create path tracer shader
+        var vs = getShaderSource(document.getElementById("vs_pathTracer"));
+        var fs = getShaderSource(document.getElementById("fs_pathTracer"));
 
         shaderProgram = createProgram(gl, vs, fs, message);
 
@@ -74,6 +140,7 @@
 
         //Fragment Shader        
         u_timeLocation = gl.getUniformLocation(shaderProgram, "time");
+		u_itrLocation = gl.getUniformLocation(shaderProgram, "u_iterations");
         //Don't k why this line doesn't work
         u_numsLocation = gl.getUniformLocation(shaderProgram, "objnums");
         u_eyeLocation = gl.getUniformLocation(shaderProgram, "cameraPos");
@@ -88,9 +155,9 @@
             u_objinvmodelviewLocation.push(gl.getUniformLocation(shaderProgram, "u_objinvmodelview[" + i.toString(10) + "]"));
             u_objinvtransmodelviewLocation.push(gl.getUniformLocation(shaderProgram, "u_objinvtransmodelview[" + i.toString(10) + "]"));
         }
-
-
         gl.useProgram(shaderProgram);
+		
+		
     })();
 
     var Datas = [];
@@ -270,22 +337,11 @@
     })();
 
 
-    (function initBuffers() {
-        var vertexPositionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
-        var vertices = [
-         1.0, 1.0,
-        -1.0, 1.0,
-         1.0, -1.0,
-        -1.0, -1.0,
-        ];
-
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        gl.vertexAttribPointer(VertexLocation, 2, gl.FLOAT, false, 0, 0);
-    })();
+    
 
 
     var time = 0;
+	var iterations = 0;
     var mouseLeftDown = false;
     var mouseRightDown = false;
     var lastMouseX = null;
@@ -379,6 +435,8 @@
 
         ///////////////////////////////////////////////////////////////////////////
         // Render
+		gl.useProgram(shaderProgram);
+		
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         var modelview = mat4.create();
@@ -393,6 +451,7 @@
         var inversemp = mat4.create();
         mat4.inverse(modelviewprojection, inversemp);
 
+		/*
         //        for (var i = 0; i < 1; i++) {
         //            gl.uniform3f(u_objcolorsLocation[i], 1.0, 0.0, 0.0);
         //            gl.uniform2f(u_objtypesLocation[i], 1.0, 0.0);
@@ -421,14 +480,37 @@
         //            gl.uniformMatrix4fv(u_objinvmodelviewLocation[i], false, inversmodelv);
         //            gl.uniformMatrix4fv(u_objinvtransmodelviewLocation[i], false, transinversmodelv);
         //        }
-
+*/
 
         gl.uniformMatrix4fv(u_vInvMPLocation, false, inversemp);
         gl.uniform3f(u_veyeLocation, eye.x, eye.y, eye.z);
         gl.uniform3f(u_eyeLocation, eye.x, eye.y, eye.z);
         gl.uniform1f(u_timeLocation, time);
+		gl.uniform1f(u_itrLocation, iterations);
         gl.uniform1i(u_numsLocation, currobjnum);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+		
+		
+		//gl.useProgram(shaderProgram);
+		gl.bindTexture(gl.TEXTURE_2D, textures[0]);
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+		gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[1], 0);
+		gl.vertexAttribPointer(VertexLocation, 2, gl.FLOAT, false, 0, 0);
+		
+		
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+		  
+		textures.reverse();
+		
+		gl.useProgram(renderProgram);
+		gl.bindTexture(gl.TEXTURE_2D, textures[0]);
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+		gl.vertexAttribPointer(renderVertexAttribute, 2, gl.FLOAT, false, 0, 0);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+		
+		
+		iterations++;
         time += 0.001;
         window.requestAnimFrame(animate);
     })();
