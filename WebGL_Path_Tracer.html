@@ -1,22 +1,49 @@
 <html>
-
 	<head>
 	<title>WebGL Path Tracing</title>
 	<meta charset ="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="chrome=1">  <!-- Use Chrome Frame in IE --> 
+	<style>
+	body{
+		background-color:#000; 
+		color:white;
+	}
+	input[type="button"]{
+		width:100px;
+		color: #333;
+		background-color: #fff;
+		border-color: #ccc;
+		border: 1px solid transparent;
+		border-radius: 4px;
+		margin: 0 5px 10px 5px;
+		padding: 2px 12px;
+		font-size: 14px;
+		font-weight:400;
+		cursor:pointer;
+		text-align: center;
+		white-space: nowrap;
+		vertical-align: middle;
+	}
+	input:hover{
+		color: #333;
+		background-color: #e6e6e6;
+		border-color: #adadad;
+	}
+	
+		
+	</style>
 	</head>
 
-	<body style="background:#000; color:white;">
-	 <div class="text" style=" text-align:center;"><h1>WebGL Path Tracing</h1></div>
-	<div style="width:512px; float:left">
+	<body>
+	<div class="text" style=" text-align:center;"><h1>WebGL Path Tracing</h1></div>
+	<div style="width:550px; float:left; text-align:center; padding:0 20px;">
 		<canvas id="canvas" style="border: none;" width="512" height="512" tabindex="1"></canvas>
 		<div id="message" style="display:block;text-align:center;"></div> <!-- Pixel offset to avoid FPS counter -->
 	</div>
-   <div style="width:50%; float:left; margin:20px;">
-	<input type = "button" value="Add Cube" onclick="addCube();"/>
-	<input type = "button" value="Add Sphere" onclick="addSphere();"/>
-	<hr/>
-	<input type = "button" value="Default Scene" onclick="defaultScene();"/>
+	<div style="width:50%; float:left;">
+		<input type = "button" value="Add Cube" onclick="addCube();"/>
+		<input type = "button" value="Add Sphere" onclick="addSphere();"/>
+		<input type = "button" value="Default Scene" onclick="defaultScene();"/>
    </div>
 	
 	

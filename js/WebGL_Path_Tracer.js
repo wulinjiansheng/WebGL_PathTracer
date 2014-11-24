@@ -75,7 +75,7 @@ function runGL() {
 	document.onmouseup = handleMouseUp;
 	document.onmousemove = handleMouseMove;
 	
-	initUI();
+	initGUI();
 	
 }
 
@@ -578,7 +578,8 @@ iterations = 0;
 /////////////////////////////////////////////////////////////////////////
 /*******************************GUI*************************************/
 var minColor = [1,1,1];
-function initUI() {
+function initGUI() {
+	gui.style = "top:200px;";
 	var guiConfig = new GUIConfig();
 	
 	// gui.addColor(guiConfig, 'minColor').onChange(function () {
