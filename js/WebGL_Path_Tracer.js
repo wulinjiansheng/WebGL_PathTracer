@@ -52,6 +52,9 @@ var frameBuffer;
 var time = 0;
 var iterations = 0;
 
+var Datas = [];
+var DefaultDatas = [];
+
 //Added
 var stats = initStats();
 
@@ -63,7 +66,7 @@ function runGL() {
 	initGL();
 	initBuffers();
 	initializeShader();
-	DefaultScene();
+	initDfaultScene();
 	animate();
 	
 	//register
@@ -226,7 +229,7 @@ function animate() {
 	gl.uniform3f(u_eyeLocation, eye.x, eye.y, eye.z);
 	gl.uniform1f(u_timeLocation, time);
 	gl.uniform1f(u_itrLocation, iterations);
-	gl.uniform1i(u_numsLocation, currobjnum);
+	gl.uniform1i(u_numsLocation, Datas.length);
 
 	gl.bindTexture(gl.TEXTURE_2D, textures[0]);
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
@@ -254,8 +257,6 @@ function animate() {
 
 ///////////////////////////////////////////////////////////////////////////
 
-var Datas = [];
-
 function addObjsInShader(i){
 	gl.useProgram(shaderProgram);
 	
@@ -272,21 +273,21 @@ function TransformObjs(i) {
 
 	gl.useProgram(shaderProgram);
 	
-	gl.uniform3f(u_objcolorsLocation[i], DefaultDatas[i].obj_color[0], DefaultDatas[i].obj_color[1], DefaultDatas[i].obj_color[2]);
-	gl.uniform2f(u_objtypesLocation[i], DefaultDatas[i].obj_type, DefaultDatas[i].obj_textureType);
-	gl.uniform3f(u_objmat1Location[i], DefaultDatas[i].obj_reflective, DefaultDatas[i].obj_refractive, DefaultDatas[i].obj_reflectivity);
-	gl.uniform3f(u_objmat2Location[i], DefaultDatas[i].obj_indexOfRefraction, DefaultDatas[i].obj_subsurfaceScatter, DefaultDatas[i].obj_emittance);
+	gl.uniform3f(u_objcolorsLocation[i], Datas[i].obj_color[0], Datas[i].obj_color[1], Datas[i].obj_color[2]);
+	gl.uniform2f(u_objtypesLocation[i], Datas[i].obj_type, Datas[i].obj_textureType);
+	gl.uniform3f(u_objmat1Location[i], Datas[i].obj_reflective, Datas[i].obj_refractive, Datas[i].obj_reflectivity);
+	gl.uniform3f(u_objmat2Location[i], Datas[i].obj_indexOfRefraction, Datas[i].obj_subsurfaceScatter, Datas[i].obj_emittance);
 
 	var modelv = mat4.create();
 	mat4.identity(modelv);
 	var objtrans = mat4.create();
-	var translatev = DefaultDatas[i].obj_pos;
+	var translatev = Datas[i].obj_pos;
 	mat4.translate(modelv, translatev, objtrans);
-	var rotangle = DefaultDatas[i].obj_rotation;
+	var rotangle = Datas[i].obj_rotation;
 	mat4.rotate(objtrans, rotangle[0] * Math.PI / 180.0, [1.0, 0.0, 0.0], objtrans);
 	mat4.rotate(objtrans, rotangle[1] * Math.PI / 180.0, [0.0, 1.0, 0.0], objtrans);
 	mat4.rotate(objtrans, rotangle[2] * Math.PI / 180.0, [0.0, 0.0, 1.0], objtrans);
-	var scalev = DefaultDatas[i].obj_scale;
+	var scalev = Datas[i].obj_scale;
 	mat4.scale(objtrans, scalev, objtrans);
 
 	var inversmodelv = mat4.create();
@@ -300,7 +301,7 @@ function TransformObjs(i) {
 	gl.uniformMatrix4fv(u_objinvtransmodelviewLocation[i], false, transinversmodelv);
 }
 
-function AddCube() {
+function addCube() {
 	Datas.push({
 		obj_pos: [Math.random()*10-5, Math.random()*10-5, Math.random()*10-5],
 		obj_scale: [1.0, 1.0, 1.0],
@@ -315,15 +316,14 @@ function AddCube() {
 		obj_emittance: 0,
 		obj_subsurfaceScatter: 0
 	});
-	DefaultDatas.push(Datas[currobjnum++]);
 	
-	TransformObjs(currobjnum-1);
-	addObjsInShader(currobjnum-1);
+	TransformObjs(Datas.length-1);
+	addObjsInShader(Datas.length-1);
 	
 	iterations = 0;
 }
 
-function AddSphere() {
+function addSphere() {
 	Datas.push({
 		obj_pos: [Math.random()*10-5, Math.random()*10-5, Math.random()*10-5],
 		obj_scale: [1.0, 1.0, 1.0],
@@ -338,20 +338,18 @@ function AddSphere() {
 		obj_emittance: 0,
 		obj_subsurfaceScatter: 0
 	});
-	DefaultDatas.push(Datas[currobjnum++]);
 	
-	TransformObjs(currobjnum-1);
-	addObjsInShader(currobjnum-1);
+	TransformObjs(Datas.length-1);
+	addObjsInShader(Datas.length-1);
 	
 	iterations = 0;
 }
 
-var DefaultDatas = [];
-function DefaultScene() {
+function initDfaultScene() {
 	//Walls
 	var WallScale = 10.0;
 	var WallTrans = 5.0;
-	Datas.push({
+	DefaultDatas.push({
 		obj_pos: [0.0, 0.0, -WallTrans],
 		obj_scale: [WallScale, WallScale, 0.1],
 		obj_rotation: [0.0, 0.0, 0.0],
@@ -365,10 +363,9 @@ function DefaultScene() {
 		obj_emittance: 0,
 		obj_subsurfaceScatter: 0
 	});
-	DefaultDatas.push(Datas[currobjnum++]);
 
 	//Walls
-	Datas.push({
+	DefaultDatas.push({
 		obj_pos: [WallTrans, 0.0, 0.0],
 		obj_scale: [0.1, WallScale, WallScale],
 		obj_rotation: [0.0, 0.0, 0.0],
@@ -382,10 +379,9 @@ function DefaultScene() {
 		obj_emittance: 0,
 		obj_subsurfaceScatter: 0
 	});
-	DefaultDatas.push(Datas[currobjnum++]);
 
 	//Walls
-	Datas.push({
+	DefaultDatas.push({
 		obj_pos: [-WallTrans, 0.0, 0.0],
 		obj_scale: [0.1, WallScale, WallScale],
 		obj_rotation: [0.0, 0.0, 0.0],
@@ -399,10 +395,9 @@ function DefaultScene() {
 		obj_emittance: 0,
 		obj_subsurfaceScatter: 0
 	});
-	DefaultDatas.push(Datas[currobjnum++]);
 
 	//Walls
-	Datas.push({
+	DefaultDatas.push({
 		obj_pos: [0.0, -WallTrans, 0.0],
 		obj_scale: [WallScale, 0.1, WallScale],
 		obj_rotation: [0.0, 0.0, 0.0],
@@ -416,11 +411,10 @@ function DefaultScene() {
 		obj_emittance: 0,
 		obj_subsurfaceScatter: 0
 	});
-	DefaultDatas.push(Datas[currobjnum++]);
 
 
 	//Walls
-	Datas.push({
+	DefaultDatas.push({
 		obj_pos: [0.0, WallTrans, 0.0],
 		obj_scale: [WallScale, 0.1, WallScale],
 		obj_rotation: [0.0, 0.0, 0.0],
@@ -434,10 +428,9 @@ function DefaultScene() {
 		obj_emittance: 0,
 		obj_subsurfaceScatter: 0
 	});
-	DefaultDatas.push(Datas[currobjnum++]);
 
 	//Sphere
-	Datas.push({
+	DefaultDatas.push({
 		obj_pos: [-3.0, 1.0, 0.0],
 		obj_scale: [3.3, 3.3, 3.3],
 		obj_rotation: [0.0, 0.0, 0.0],
@@ -451,10 +444,9 @@ function DefaultScene() {
 		obj_emittance: 0,
 		obj_subsurfaceScatter: 0
 	});
-	DefaultDatas.push(Datas[currobjnum++]);
 
 	//Light
-	Datas.push({
+	DefaultDatas.push({
 		obj_pos: [0.0, 4.88, 0.0],
 		obj_scale: [3.8, 0.2, 3.8],
 		obj_rotation: [0.0, 0.0, 0.0],
@@ -468,11 +460,10 @@ function DefaultScene() {
 		obj_emittance: 25,
 		obj_subsurfaceScatter: 0
 	});
-	DefaultDatas.push(Datas[currobjnum++]);
 
 
 	//Box
-	Datas.push({
+	DefaultDatas.push({
 		obj_pos: [2.0, 0.0, 0.0],
 		obj_scale: [1.8, 1.8, 1.8],
 		obj_rotation: [40.0, 40.0, 0.0],
@@ -486,11 +477,19 @@ function DefaultScene() {
 		obj_emittance: 0,
 		obj_subsurfaceScatter: 0
 	});
-	DefaultDatas.push(Datas[currobjnum++]);
 
+	defaultScene();
+}
+
+function defaultScene() {
+	Datas.length = 0;
+	
 	for (var i = 0; i < DefaultDatas.length; i++) {
-		TransformObjs(i);
+			Datas[i] = DefaultDatas[i];
+			TransformObjs(i);
 	}
+	
+	iterations = 0;
 }
 
 
