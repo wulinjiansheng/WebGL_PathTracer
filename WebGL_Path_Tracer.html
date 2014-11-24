@@ -11,7 +11,7 @@
 	<div id="message" style="position:absolute;top:100px"></div> <!-- Pixel offset to avoid FPS counter -->
 	<canvas id="canvas" style="border: none;" width="512" height="512" tabindex="1"></canvas>
 
-<script id="vs" type="x-shader/x-vertex">
+<script id="vs_pathTracer" type="x-shader/x-vertex">
 precision highp float;
 
 attribute vec2 aVertex;
@@ -32,12 +32,15 @@ void main(void)
 }
 
 </script>
-<script id="fs" type="x-shader/x-fragment">
+<script id="fs_pathTracer" type="x-shader/x-fragment">
 precision highp float;
 
 uniform float time;
 uniform int objnums;
 uniform vec3 cameraPos;
+
+uniform float u_iterations;
+uniform sampler2D texture;
 
 varying vec3 InitRay;
 const int MAX_OBJ_NUM = 10;
@@ -284,14 +287,14 @@ float random(vec3 noise, float seed) {
 }
 	
 	
-vec3 cosineWeightedDirection(float seed, vec3 normal) 
+vec3 calculateRandomDirectionInHemisphere(float seed, vec3 normal) 
 {
 	float u = random(vec3(12.9898, 78.233, 151.7182), seed);
 	float v = random(vec3(63.7264, 10.873, 623.6736), seed);
 			
 	float up = sqrt(u); 
 	float over = sqrt(1.0 - up * up); 
-	float around = v * 3.14 * 2.0;
+	float around = v * 3.141592 * 2.0;
 		
 	vec3 directionNotNormal;
 	if (abs(normal.x) < 0.577350269189) { 
@@ -325,19 +328,21 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
 			if(intersect.emittance > 0)
 			{//is light
 				colorMask = colorMask * intersect.color * float(intersect.emittance);
-				col += colorMask;	//don't know why 5.0 doesn't work
-				return col;		
-			}else
+				col = colorMask;	
+				break;	
+			}
+            else
             {//Non light object					      									
 				colorMask *= intersect.color;
 				col+= colorMask;																								
-				r.origin = intersect.IntersectP + r.dir*0.001;
-				r.dir = normalize(cosineWeightedDirection(time + float(i), intersect.IntersectN));																				
+				
+				r.dir = normalize(calculateRandomDirectionInHemisphere(time + float(i), intersect.IntersectN));	
+                r.origin = intersect.IntersectP + r.dir*0.001;																			
 			}
 		}
         else{
 			col = vec3(0.0);
-			return col;				
+			break;			
 		}				
 	}			
 	return col;   
@@ -346,7 +351,6 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
 
 void main(void)
 {
-	
 	RAY r;
 	r.origin = cameraPos.xyz;
 	r.dir = normalize(InitRay);
@@ -355,11 +359,43 @@ void main(void)
     initializeGeometry();
 	vec3 finalCol = vec3(0.0,0.0,0.0); 
 	pathTrace(r, 1, finalCol);
-	gl_FragColor = vec4(finalCol/5.0, 1.0);
+	//gl_FragColor = vec4(finalCol/5.0, 1.0);
+	
+	vec3 texCol = texture2D(texture, gl_FragCoord.xy / 512.0).rgb;
+	gl_FragColor = vec4(mix( finalCol/5.0, texCol,u_iterations / (1.0+u_iterations)), 1.0);
+	
+	//float itrColor = 0.01 * u_iterations;
+	//gl_FragColor =vec4(vec3(itrColor,itrColor,itrColor)+texCol, 1.0);
 }
 
 </script>
+<script id="vs_render" type="x-shader/x-vertex">
 
+precision highp float;
+
+attribute vec3 aVertex;
+
+varying vec2 v_texCoord;
+
+void main(void)
+{
+   v_texCoord = aVertex.xy * 0.5 + 0.5;
+   gl_Position = vec4(aVertex, 1.0);
+}
+
+</script>
+<script id="fs_render" type="x-shader/x-fragment">
+precision highp float;
+
+uniform sampler2D texture;
+varying vec2 v_texCoord;
+
+void main(void)
+{
+    gl_FragColor = texture2D(texture, v_texCoord);
+}
+
+</script>
 <script src ="js/lib/gl-matrix.js" type ="text/javascript"></script>
 <script src ="js/webGLUtility.js" type ="text/javascript"></script>
 <script src ="js/WebGL_Path_Tracer.js" type ="text/javascript"></script>
