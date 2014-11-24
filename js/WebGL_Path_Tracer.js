@@ -273,8 +273,8 @@
 
         //Light
         Datas.push({
-            obj_pos: [0.0,4.95, 0.0],
-            obj_scale: [2.8, 0.1, 1.8],
+            obj_pos: [0.0,5.0, 0.0],
+            obj_scale: [3.8, 0.2, 3.8],
             obj_rotation: [0.0, 0.0, 0.0],
             obj_color: [1.0, 1.0, 1.0],
             obj_type: 2,
@@ -283,7 +283,7 @@
             obj_refractive: 0,
             obj_reflectivity: 1.0,
             obj_indexOfRefraction: 1.0,
-            obj_emittance: 15,
+            obj_emittance: 25,
             obj_subsurfaceScatter: 0
         });
         DefaultDatas.push(Datas[currobjnum++]);

@@ -312,7 +312,7 @@ vec3 calculateRandomDirectionInHemisphere(float seed, vec3 normal)
 }
 
 
-const int depth = 5;
+const int depth = 6;
 vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
 	vec3 colorMask = vec3(1.0);
 	float incidentIOR = 1.0;
@@ -329,7 +329,7 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
 			{//is light
 				colorMask = colorMask * intersect.color * float(intersect.emittance);
 				col = colorMask;	
-				break;	
+			    return col;   
 			}
             else
             {//Non light object					      									
@@ -341,12 +341,13 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
 			}
 		}
         else{
-			col = vec3(0.0);
-			break;			
+			col = vec3(0.0,0.0,0.0);
+			return col;   		
 		}				
-	}			
-	return col;   
-		
+	}	
+    
+    col = vec3(0.0,0.0,0.0);		
+	return col;   	
 }
 
 void main(void)
