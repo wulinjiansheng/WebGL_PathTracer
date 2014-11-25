@@ -28,8 +28,6 @@ var u_veyeLocation;
 var u_vInvMPLocation;
 
 //Fragment Shader
-var currobjnum = 0;
-var maxobjnum = 10;
 var u_numsLocation;
 var u_eyeLocation;
 var u_timeLocation;
@@ -154,13 +152,6 @@ function initializeShader() {
 	//Don't k why this line doesn't work
 	u_numsLocation = gl.getUniformLocation(shaderProgram, "objnums");
 	u_eyeLocation = gl.getUniformLocation(shaderProgram, "cameraPos");
-	
-	for (var i = 0; i < maxobjnum; i++)
-		addObjsInShader(i);
-
-	//uniforms for objects
-	
-	gl.useProgram(shaderProgram);
 }
 
 function animate() {
@@ -192,37 +183,6 @@ function animate() {
 
 	var inversemp = mat4.create();
 	mat4.inverse(modelviewprojection, inversemp);
-
-	/*
-	//        for (var i = 0; i < 1; i++) {
-	//            gl.uniform3f(u_objcolorsLocation[i], 1.0, 0.0, 0.0);
-	//            gl.uniform2f(u_objtypesLocation[i], 1.0, 0.0);
-	//            gl.uniform3f(u_objmat1Location[i], 0.0, 0.0, 0.0);
-	//            gl.uniform3f(u_objmat2Location[i], 1.0, 0.0, 0.0);
-
-	//            var modelv = mat4.create();
-	//            mat4.identity(modelv);
-	//            var objtrans = mat4.create();
-	//            var translatev = [-1.0, 1.0, 0.0];
-	//            mat4.translate(modelv, translatev, objtrans);
-	//            var rotangle = [0.0, 0.0, 0.0];
-	//            mat4.rotate(objtrans, rotangle[0] * Math.PI / 180.0, [1.0, 0.0, 0.0], objtrans);
-	//            mat4.rotate(objtrans, rotangle[1] * Math.PI / 180.0, [0.0, 1.0, 0.0], objtrans);
-	//            mat4.rotate(objtrans, rotangle[2] * Math.PI / 180.0, [0.0, 0.0, 1.0], objtrans);
-	//            var scalev = [2.3, 2.3, 2.3];
-	//            mat4.scale(objtrans, scalev, objtrans);
-
-	//            var inversmodelv = mat4.create();
-	//            mat4.inverse(objtrans, inversmodelv);
-
-	//            var transinversmodelv = mat4.create();
-	//            mat4.transpose(inversmodelv, transinversmodelv);
-
-	//            gl.uniformMatrix4fv(u_objmodelviewLocation[i], false, objtrans);
-	//            gl.uniformMatrix4fv(u_objinvmodelviewLocation[i], false, inversmodelv);
-	//            gl.uniformMatrix4fv(u_objinvtransmodelviewLocation[i], false, transinversmodelv);
-	//        }
-	*/
 	
 	gl.uniformMatrix4fv(u_vInvMPLocation, false, inversemp);
 	gl.uniform3f(u_veyeLocation, eye.x, eye.y, eye.z);
@@ -316,10 +276,10 @@ function addCube() {
 		obj_emittance: 0,
 		obj_subsurfaceScatter: 0
 	});
-	
+
+    addObjsInShader(Datas.length - 1);
 	TransformObjs(Datas.length-1);
-	addObjsInShader(Datas.length-1);
-	
+		
 	iterations = 0;
 }
 
@@ -338,130 +298,14 @@ function addSphere() {
 		obj_emittance: 0,
 		obj_subsurfaceScatter: 0
 	});
-	
+
+    addObjsInShader(Datas.length - 1);
 	TransformObjs(Datas.length-1);
-	addObjsInShader(Datas.length-1);
-	
+		
 	iterations = 0;
 }
 
 function initDfaultScene() {
-	//Walls
-	var WallScale = 10.0;
-	var WallTrans = 5.0;
-	DefaultDatas.push({
-		obj_pos: [0.0, 0.0, -WallTrans],
-		obj_scale: [WallScale, WallScale, 0.1],
-		obj_rotation: [0.0, 0.0, 0.0],
-		obj_color: [0.0, 1.0, 0.0],
-		obj_type: 2,
-		obj_textureType: 0,
-		obj_reflective: 0,
-		obj_refractive: 0,
-		obj_reflectivity: 1.0,
-		obj_indexOfRefraction: 1.0,
-		obj_emittance: 0,
-		obj_subsurfaceScatter: 0
-	});
-
-	//Walls
-	DefaultDatas.push({
-		obj_pos: [WallTrans, 0.0, 0.0],
-		obj_scale: [0.1, WallScale, WallScale],
-		obj_rotation: [0.0, 0.0, 0.0],
-		obj_color: [1.0, 1.0, 0.0],
-		obj_type: 2,
-		obj_textureType: 0,
-		obj_reflective: 0,
-		obj_refractive: 0,
-		obj_reflectivity: 1.0,
-		obj_indexOfRefraction: 1.0,
-		obj_emittance: 0,
-		obj_subsurfaceScatter: 0
-	});
-
-	//Walls
-	DefaultDatas.push({
-		obj_pos: [-WallTrans, 0.0, 0.0],
-		obj_scale: [0.1, WallScale, WallScale],
-		obj_rotation: [0.0, 0.0, 0.0],
-		obj_color: [1.0, 1.0, 0.0],
-		obj_type: 2,
-		obj_textureType: 0,
-		obj_reflective: 0,
-		obj_refractive: 0,
-		obj_reflectivity: 1.0,
-		obj_indexOfRefraction: 1.0,
-		obj_emittance: 0,
-		obj_subsurfaceScatter: 0
-	});
-
-	//Walls
-	DefaultDatas.push({
-		obj_pos: [0.0, -WallTrans, 0.0],
-		obj_scale: [WallScale, 0.1, WallScale],
-		obj_rotation: [0.0, 0.0, 0.0],
-		obj_color: [0.0, 0.0, 1.0],
-		obj_type: 2,
-		obj_textureType: 0,
-		obj_reflective: 0,
-		obj_refractive: 0,
-		obj_reflectivity: 1.0,
-		obj_indexOfRefraction: 1.0,
-		obj_emittance: 0,
-		obj_subsurfaceScatter: 0
-	});
-
-
-	//Walls
-	DefaultDatas.push({
-		obj_pos: [0.0, WallTrans, 0.0],
-		obj_scale: [WallScale, 0.1, WallScale],
-		obj_rotation: [0.0, 0.0, 0.0],
-		obj_color: [0.0, 0.0, 1.0],
-		obj_type: 2,
-		obj_textureType: 0,
-		obj_reflective: 0,
-		obj_refractive: 0,
-		obj_reflectivity: 1.0,
-		obj_indexOfRefraction: 1.0,
-		obj_emittance: 0,
-		obj_subsurfaceScatter: 0
-	});
-
-	//Sphere
-	DefaultDatas.push({
-		obj_pos: [-3.0, 1.0, 0.0],
-		obj_scale: [3.3, 3.3, 3.3],
-		obj_rotation: [0.0, 0.0, 0.0],
-		obj_color: [0.8, 0.0, 0.0],
-		obj_type: 0,
-		obj_textureType: 0,
-		obj_reflective: 0,
-		obj_refractive: 0,
-		obj_reflectivity: 1.0,
-		obj_indexOfRefraction: 1.0,
-		obj_emittance: 0,
-		obj_subsurfaceScatter: 0
-	});
-
-	//Light
-	DefaultDatas.push({
-		obj_pos: [0.0, 4.88, 0.0],
-		obj_scale: [3.8, 0.2, 3.8],
-		obj_rotation: [0.0, 0.0, 0.0],
-		obj_color: [1.0, 1.0, 1.0],
-		obj_type: 2,
-		obj_textureType: 0,
-		obj_reflective: 0,
-		obj_refractive: 0,
-		obj_reflectivity: 1.0,
-		obj_indexOfRefraction: 1.0,
-		obj_emittance: 25,
-		obj_subsurfaceScatter: 0
-	});
-
-
 	//Box
 	DefaultDatas.push({
 		obj_pos: [2.0, 0.0, 0.0],
@@ -477,6 +321,9 @@ function initDfaultScene() {
 		obj_emittance: 0,
 		obj_subsurfaceScatter: 0
 	});
+
+    for (var i = 0; i < DefaultDatas.length; i++)
+        addObjsInShader(i);
 
 	defaultScene();
 }
@@ -518,75 +365,93 @@ function initStats() {
 /************************* interaction ********************************/
 var mouseLeftDown = false;
 var mouseRightDown = false;
+var mouseMidDown = false;
 var lastMouseX = null;
 var lastMouseY = null;
 
 function handleMouseDown(event) {
-	if (event.button == 2) {
-		mouseLeftDown = false;
-		mouseRightDown = true;
-	}
-	else {
-		mouseLeftDown = true;
-		mouseRightDown = false;
-	}
-	lastMouseX = event.clientX;
-	lastMouseY = event.clientY;
+    if (event.button == 2) {
+        mouseLeftDown = false;
+        mouseRightDown = true;
+        mouseMidDown = false;
+    }
+    else if (event.button == 0) {
+        mouseLeftDown = true;
+        mouseRightDown = false;
+        mouseMidDown = false;
+    }
+    else if (event.button == 1) {
+        mouseLeftDown = false;
+        mouseRightDown = false;
+        mouseMidDown = true;
+    }
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
 }
 
 function handleMouseUp(event) {
-	mouseLeftDown = false;
-	mouseRightDown = false;
+    mouseLeftDown = false;
+    mouseRightDown = false;
+    mouseMidDown = false;
 }
 
 function handleMouseMove(event) {
-if (!(mouseLeftDown || mouseRightDown)) {
-	return;
+    if (!(mouseLeftDown || mouseRightDown || mouseMidDown)) {
+        return;
+    }
+    var newX = event.clientX;
+    var newY = event.clientY;
+
+    var deltaX = newX - lastMouseX;
+    var deltaY = newY - lastMouseY;
+
+    if (mouseLeftDown) {
+        // update the angles based on how far we moved since last time
+        angleY -= deltaX * 0.01;
+        angleX += deltaY * 0.01;
+
+        // don't go upside down
+        angleX = Math.max(angleX, -Math.PI / 2 + 0.01);
+        angleX = Math.min(angleX, Math.PI / 2 - 0.01);
+
+        eye.x = zoomZ * Math.sin(angleY) * Math.cos(angleX);
+        eye.y = zoomZ * Math.sin(angleX);
+        eye.z = zoomZ * Math.cos(angleY) * Math.cos(angleX);
+    }
+    else if (mouseRightDown) {
+        zoomZ += 0.01 * deltaY;
+        zoomZ = Math.min(Math.max(zoomZ, 4.0), 20.0);
+
+        eye.x = zoomZ * Math.sin(angleY) * Math.cos(angleX);
+        eye.y = zoomZ * Math.sin(angleX);
+        eye.z = zoomZ * Math.cos(angleY) * Math.cos(angleX);
+    }
+    else if (mouseMidDown) {
+        center.x -= 0.01 * deltaX;
+        center.y += 0.01 * deltaY;
+        eye.x -= 0.01 * deltaX;
+        eye.y += 0.01 * deltaY;
+    }
+
+    lastMouseX = newX;
+    lastMouseY = newY;
+
+    iterations = 0;
 }
-var newX = event.clientX;
-var newY = event.clientY;
-
-var deltaX = newX - lastMouseX;
-var deltaY = newY - lastMouseY;
-
-if (mouseLeftDown) {
-	// update the angles based on how far we moved since last time
-	angleY -= deltaX * 0.01;
-	angleX += deltaY * 0.01;
-
-	// don't go upside down
-	angleX = Math.max(angleX, -Math.PI / 2 + 0.01);
-	angleX = Math.min(angleX, Math.PI / 2 - 0.01);
-}
-else {
-	zoomZ += 0.01 * deltaY;
-	zoomZ = Math.min(Math.max(zoomZ, 5.5), 20.0);
-}
-
-eye.x = zoomZ * Math.sin(angleY) * Math.cos(angleX);
-eye.y = zoomZ * Math.sin(angleX);
-eye.z = zoomZ * Math.cos(angleY) * Math.cos(angleX);
-
-lastMouseX = newX;
-lastMouseY = newY;
-
-iterations = 0;
-
-} 
 
 
 /////////////////////////////////////////////////////////////////////////
 /*******************************GUI*************************************/
-var minColor = [1,1,1];
-function initGUI() {
-	gui.style = "top:200px;";
-	var guiConfig = new GUIConfig();
-	
-	// gui.addColor(guiConfig, 'minColor').onChange(function () {
-		// //minColor = cong.minColor;
-		// });
+var minColor = [1, 1, 1];
+function initUI() {
+    var guiConfig = new GUIConfig();
+
+    // gui.addColor(guiConfig, 'minColor').onChange(function () {
+    // //minColor = cong.minColor;
+    // });
 }
-  
+
 function GUIConfig() {
-	//this.minColor = minColor; // RGB array
+    //this.minColor = minColor; // RGB array
 }
+
