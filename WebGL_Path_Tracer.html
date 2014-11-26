@@ -201,18 +201,13 @@ struct GEOM{
     mat4 model;
     mat4 invmodel;
     mat4 transinvmodel;
+
 };
 	
 struct INTERSECT{
 	vec3 IntersectP;
 	vec3 IntersectN;
-	vec3 color;
-	int reflective;//identify whether the currently intersected object is reflective
-	int refractive;
-	float indexOfRefraction;	
-	int emittance;
-	int subsurfaceScatter;
-	float reflectivity;
+	GEOM IntersectG;
 };
 
 
@@ -516,15 +511,10 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
 					tempColor = planeColor;
 				else
 					tempColor = temp.color;
-				intersect.IntersectN = tempNormal;
-				intersect.IntersectP = tempIntersectionPoint;
-				intersect.color = tempColor;
-				intersect.reflective = temp.reflective;
-				intersect.refractive = temp.refractive;
-				intersect.indexOfRefraction = temp.indexOfRefraction;
-				intersect.emittance = temp.emittance;
-				intersect.subsurfaceScatter =  temp.subsurfaceScatter ;
-				intersect.reflectivity =  temp.reflectivity;
+
+                intersect.IntersectP = tempIntersectionPoint;
+                intersect.IntersectN = tempNormal;
+				intersect.IntersectG = temp;
 			}
 		}
 	}
@@ -534,6 +524,7 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
 	else 
 		return false;		
 }
+
 
 
 float getrandom(vec3 noise, float seed) {
@@ -571,6 +562,7 @@ vec3 calculateRandomDirectionInHemisphere(float seed, vec3 normal)
 	return ( up * normal ) + ( cos(around) * over * perpendicularDirection1 ) + ( sin(around) * over * perpendicularDirection2 );
 }
 
+/*For Refraction*/
 struct Fresnel {
   float reflectionCoefficient;
   float transmissionCoefficient;
@@ -598,14 +590,157 @@ Fresnel calculateFresnel(vec3 normal, vec3 incident, float incidentIOR, float tr
 
 }
 
-vec3 refractdir(in vec3 I, in vec3 N,in float eta)
+
+vec3 getRandomPointOnSphere(in GEOM sphere, in float seed){
+
+	float radius = 0.5;
+
+	vec3 point;
+
+	float theta, phi;
+	theta = 180.0 * getrandom(vec3(12.9898, 78.233, 151.7182), seed); //0-180
+	phi = 360.0 * getrandom(vec3(78.233, 12.9898, 151.7182), seed+1.0); //0-360
+
+	float degToRad = PI / 180.0;
+
+	point.x = radius * sin(theta * degToRad) * cos(phi * degToRad);
+	point.y = radius * sin(theta * degToRad) * sin(phi * degToRad);
+	point.z = radius * cos(theta * degToRad);
+
+	vec3 randPoint = (sphere.model * vec4(point, 1.0)).xyz;
+
+	return randPoint;
+}
+
+vec3 getRandomPointOnCube(in GEOM cube, in float seed){
+
+    vec3 origin = (cube.model * vec4(0.0,0.0,0.0,1.0)).xyz;
+    vec3 xmax = (cube.model * vec4(0.5,0.0,0.0,1.0)).xyz;
+    vec3 ymax = (cube.model * vec4(0.0,0.5,0.0,1.0)).xyz;
+    vec3 zmax = (cube.model * vec4(0.0,0.0,0.5,1.0)).xyz;
+    float xradius = distance(origin, xmax);
+    float yradius = distance(origin, ymax);
+    float zradius = distance(origin, zmax);
+
+    //get surface areas of sides
+    vec3 radii = vec3(xradius,yradius,zradius);
+    float side1 = radii.x * radii.y * 4.0; //x-y face
+    float side2 = radii.z * radii.y * 4.0; //y-z face
+    float side3 = radii.x * radii.z * 4.0; //x-z face
+    float totalarea = 2.0 * (side1+side2+side3);
+    
+    //pick random face, weighted by surface area
+    float russianRoulette = getrandom(vec3(12.9898, 78.233, 151.7182), seed); //0-1
+    
+    float rand1 = getrandom(vec3(78.233, 12.9898, 151.7182), seed + 1.0) - 0.5; //-0.5-0.5
+    float rand2 = getrandom(vec3(151.7182, 12.9898, 78.233), seed + 2.0) - 0.5; //-0.5-0.5
+
+    vec3 point = vec3(0.5,0.5,0.5);
+    
+    if(russianRoulette<(side1/totalarea))
+       point = vec3(rand1, rand2, 0.5);
+    else if(russianRoulette<((side1*2.0)/totalarea))
+       point = vec3(rand1, rand2, -0.5);
+    else if(russianRoulette<(((side1*2.0)+(side2))/totalarea))
+       point = vec3(0.5, rand1, rand2);
+    else if(russianRoulette<(((side1*2.0)+(side2*2.0))/totalarea))
+       point = vec3(-0.5, rand1, rand2);
+    else if(russianRoulette<(((side1*2.0)+(side2*2.0)+(side3))/totalarea))
+       point = vec3( rand1, 0.5, rand2);
+    else
+       point = vec3( rand1, -0.5, rand2);
+
+    
+    vec3 randPoint = (cube.model * vec4(point,1.0)).xyz;
+
+    return randPoint;
+       
+}
+
+///*For Subsurface Scattering  https://machinesdontcare.wordpress.com/tag/subsurface/ */
+float halfLambert(in vec3 vect1, in vec3 vect2)
 {
-	float dotValue = dot(N, I);
-	float k = 1.0 - eta * eta * (1.0 - dotValue * dotValue);
-	if(k < 0.0)
-		return vec3(0.0);
-	else
-		return normalize(eta * I - (eta * dotValue + sqrt(k)) * N);
+	float product = dot(vect1,vect2);
+	return product * 0.5 + 0.5;
+}
+
+float blinnPhongSpecular(in vec3 normalVec, in vec3 lightVec, in float specPower)
+{
+	vec3 halfAngle = normalize(normalVec + lightVec);
+	return pow(clamp(0.0,1.0,dot(normalVec,halfAngle)),specPower);
+}
+	
+	
+vec3 subScatterFS(in INTERSECT intersect,in float seed)
+{	
+    GEOM light; //light at index 0 
+    float attw = attrtexsize.r;
+    float atth = attrtexsize.g;
+
+    float fix = 0.0;
+    float fiy = 0.0;
+    light.color = texture2D(attrtexture, vec2((7.0 * fix)/attw,0.0/atth)).rgb;
+
+    light.type = int(5.0 * texture2D(attrtexture, vec2((7.0 * fix + 1.0)/attw,fiy/atth)).r);
+    light.textureType = int(texture2D(attrtexture, vec2((7.0 * fix + 1.0)/attw,fiy/atth)).g);
+
+    light.reflective = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).r);
+    light.refractive = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).g);
+    light.reflectivity = texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).b;
+
+    light.indexOfRefraction =  3.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).r;
+    light.subsurfaceScatter = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).g);
+    light.emittance = int(25.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).b);
+
+    mat4 modelview = mat4(1.0);     
+    translate(modelview,20.0 * (texture2D(attrtexture, vec2((7.0 * fix + 4.0)/attw,fiy/atth)).rgb-0.5));
+    vec3 rotv =  texture2D(attrtexture, vec2((7.0 * fix + 5.0)/attw,fiy/atth)).rgb;
+    rotateX(modelview,360.0 * PI / 180.0 * rotv.x);
+    rotateY(modelview,360.0 * PI / 180.0 * rotv.y);
+    rotateZ(modelview,360.0 * PI / 180.0 * rotv.z);
+    scale(modelview,10.0 * texture2D(attrtexture, vec2((7.0 * fix + 6.0)/attw,fiy/atth)).rgb);
+    light.model = modelview;
+    light.invmodel = inversemat(modelview);
+    light.transinvmodel = transposemat(inversemat(modelview));
+      	
+	float RimScalar = 1.0;
+	float MaterialThickness = 0.3;
+	vec3 ExtinctionCoefficient = vec3(1.0,1.0,1.0);
+	vec3 SpecColor = vec3(1.0,1.0,1.0);
+    vec3 lightPoint = vec3(0.0,5.0,0.0);
+//    if(light.type==0)
+//	   lightPoint = getRandomPointOnCube(light,seed);
+//    else if(light.type==2)
+//       lightPoint = getRandomPointOnSphere(light,seed);
+
+	vec3 p = intersect.IntersectP ;
+
+	float attenuation = 10.0 * (1.0 / distance(lightPoint,intersect.IntersectP));
+	vec3 eVec = normalize(intersect.IntersectP);
+	vec3 lVec = normalize(lightPoint - intersect.IntersectP);
+	vec3 wNorm = normalize(intersect.IntersectN);
+
+	vec3 dotLN = vec3(halfLambert(lVec,wNorm) * attenuation);
+	dotLN *= intersect.IntersectG.color;
+		
+	vec3 indirectLightComponent = vec3(MaterialThickness * max(0.0,dot(-wNorm,lVec)));
+	indirectLightComponent += MaterialThickness * halfLambert(-eVec,lVec);
+	indirectLightComponent *= attenuation;
+	indirectLightComponent.r *= ExtinctionCoefficient.r;
+	indirectLightComponent.g *= ExtinctionCoefficient.g;
+	indirectLightComponent.b *= ExtinctionCoefficient.b;
+
+	vec3 rim = vec3(1.0 - max(0.0,dot(wNorm,eVec)));
+	rim *= rim;
+	rim *= max(0.0,dot(wNorm,lVec)) * SpecColor.rgb;
+		
+	vec4 finalCol = vec4(dotLN,1.0) + vec4(indirectLightComponent,1.0);
+	finalCol.rgb += (rim * RimScalar * attenuation * finalCol.a);
+    float SpecularPower = 15.0;
+	finalCol.rgb += vec3(blinnPhongSpecular(wNorm,lVec,SpecularPower) * attenuation * SpecColor * finalCol.a * 0.02);
+	finalCol.rgb *= vec3(1.0);//light.color
+
+	return finalCol.rgb;   
 }
 
 
@@ -625,57 +760,77 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
         float seed = time + float(i);
         
 		if (intersectWorld(r, intersect,dist)) {	
-			if(intersect.emittance > 0)
+			if(intersect.IntersectG.emittance > 0)
 			{//is light
-				colorMask = colorMask * intersect.color * float(intersect.emittance);
+				colorMask = colorMask * intersect.IntersectG.color * float(intersect.IntersectG.emittance);
 				col = colorMask;	
 			    return col;   
 			}
-            else if(intersect.refractive > 0)
-            {
-                vec3 random = vec3(rand(intersect.IntersectP.xy),rand(intersect.IntersectP.xz),rand(intersect.IntersectP.yz)) ;
-            	float oldIOR = r.IOR;
-	            float newIOR = intersect.indexOfRefraction;
-
-                Fresnel fresnel;
-
-                float reflect_range = -1.0;
-                float IOR12 = oldIOR/newIOR;
-                vec3 reflectR = reflect(r.dir,intersect.IntersectN);
-                vec3 refractR = refractdir(-r.dir,intersect.IntersectN,IOR12);
-                fresnel = calculateFresnel(intersect.IntersectN,r.dir,oldIOR,newIOR);
-
-                reflect_range =  fresnel.reflectionCoefficient;  
-
-                float randomnum = getrandom(random,seed);
-                if(randomnum <reflect_range)
-                {
-                    r.IOR = newIOR;
-                    r.dir = reflectR;
-                    r.origin = intersect.IntersectP + shift * r.dir;
-                }
-                else
-                {
-                    r.IOR = newIOR;
-                    r.dir = refractR;
-                    r.origin = intersect.IntersectP + shift * r.dir;
-                }
-            }
-            else if(intersect.reflective > 0)
-            {
-                r.IOR = 1.0;               
-                r.dir = reflect(r.dir,intersect.IntersectN);// r.dir - 2.0 * dot(intersect.IntersectN, r.dir ) * intersect.IntersectN;
-                r.origin = intersect.IntersectP + shift * r.dir;
-            }
-            else
+            else if(intersect.IntersectG.refractive == 0 && intersect.IntersectG.reflective == 0 && intersect.IntersectG.subsurfaceScatter == 0)
             {//Non light object					      									
-				colorMask *= intersect.color;
+				colorMask *= intersect.IntersectG.color;
 				col+= colorMask;																								
 				
 				float random = rand(intersect.IntersectP.xy);
 				r.dir = normalize(calculateRandomDirectionInHemisphere(seed + random, intersect.IntersectN));	
                 r.origin = intersect.IntersectP + r.dir * shift;																			
 			}
+            else
+            {  
+                bool isInsideOut = dot(r.dir,intersect.IntersectN) > 0.0; //out:> 0.0 true,in :<=0.0  false     
+            	if(!isInsideOut && intersect.IntersectG.subsurfaceScatter > 0)
+                {
+                    float random = rand(intersect.IntersectP.xy);
+				    colorMask *= subScatterFS(intersect,random);
+                }
+
+                if(intersect.IntersectG.refractive > 0)   //refractive object must have reflective
+                {
+                    vec3 random = vec3(rand(intersect.IntersectP.xy),rand(intersect.IntersectP.xz),rand(intersect.IntersectP.yz)) ;
+                    float oldIOR = r.IOR;
+                    float newIOR = intersect.IntersectG.indexOfRefraction;
+
+                    Fresnel fresnel;
+
+                    float reflect_range = -1.0;
+                    float IOR12 = oldIOR/newIOR;
+                    vec3 reflectR = reflect(r.dir,intersect.IntersectN);
+                    vec3 refractR = refract(r.dir,intersect.IntersectN,IOR12);
+                    fresnel = calculateFresnel(intersect.IntersectN,r.dir,oldIOR,newIOR);
+
+                    reflect_range =  fresnel.reflectionCoefficient;  
+
+                    float randomnum = getrandom(random,seed);
+                    if(randomnum <reflect_range)
+                    {
+                        r.dir = reflectR;
+                        r.origin = intersect.IntersectP + shift * r.dir;
+                    }
+                    else
+                    {
+                        r.dir = refractR;
+                        r.origin = intersect.IntersectP + shift * r.dir;
+                    }
+
+                    
+                    if(!isInsideOut)  //from objects
+                        r.IOR = newIOR;
+                    else   //from air
+                        r.IOR = 1.0;
+
+                    colorMask *= intersect.IntersectG.color;
+                    col+= colorMask;
+                }
+                else if(intersect.IntersectG.reflective > 0)
+                {
+                    colorMask *= intersect.IntersectG.color;
+                    col+= colorMask;
+                    r.IOR = 1.0;               
+                    r.dir = reflect(r.dir,intersect.IntersectN);
+                    r.origin = intersect.IntersectP + shift * r.dir;
+                }
+            }
+
 
 
 		}

@@ -319,6 +319,23 @@ function addSphere() {
 }
 
 function initDfaultScene() {
+     
+    //Light For Subsurface Scattering,only one light and always at first
+    DefaultDatas.push({
+        obj_pos: [0.0, 4.95, 0.0],
+        obj_scale: [3.8, 0.1, 3.8],
+        obj_rotation: [0.0, 0.0, 0.0],
+        obj_color: [1.0, 1.0, 1.0],
+        obj_type: 2,
+        obj_textureType: 0,
+        obj_reflective: 0,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 25,
+        obj_subsurfaceScatter: 0
+    });
+
     //Walls
     var WallScale = 10.0;
     var WallTrans = 5.0; 
@@ -412,23 +429,6 @@ function initDfaultScene() {
         obj_emittance: 0,
         obj_subsurfaceScatter: 0
     });
-
-    //Light
-    DefaultDatas.push({
-        obj_pos: [0.0, 4.95, 0.0],
-        obj_scale: [3.8, 0.1, 3.8],
-        obj_rotation: [0.0, 0.0, 0.0],
-        obj_color: [1.0, 1.0, 1.0],
-        obj_type: 2,
-        obj_textureType: 0,
-        obj_reflective: 0,
-        obj_refractive: 0,
-        obj_reflectivity: 1.0,
-        obj_indexOfRefraction: 1.0,
-        obj_emittance: 25,
-        obj_subsurfaceScatter: 0
-    });
-
 
 
 	//Box
@@ -530,7 +530,7 @@ function initDfaultScene() {
         obj_pos: [0.0, 0.0, 0.0],
         obj_scale: [1.8, 1.8, 1.8],
         obj_rotation: [30.0, 4.0, 0.0],
-        obj_color: [1.0, 0.0, 0.0],
+        obj_color: [0.95, 0.5, 0.4],
         obj_type: 0,
         obj_textureType: 0,
         obj_reflective: 1,
@@ -538,7 +538,7 @@ function initDfaultScene() {
         obj_reflectivity: 1.0,
         obj_indexOfRefraction: 1.0,
         obj_emittance: 0,
-        obj_subsurfaceScatter: 0
+        obj_subsurfaceScatter: 1
     });
 
 
@@ -547,7 +547,7 @@ function initDfaultScene() {
         obj_pos: [2.0, 0.0, 0.0],
         obj_scale: [1.8, 1.8, 1.8],
         obj_rotation: [30.0, 4.0, 0.0],
-        obj_color: [1.0, 0.0, 0.0],
+        obj_color: [1.0, 1.0, 1.0],
         obj_type: 0,
         obj_textureType: 0,
         obj_reflective: 1,
@@ -555,7 +555,7 @@ function initDfaultScene() {
         obj_reflectivity: 1.0,
         obj_indexOfRefraction: 1.5,
         obj_emittance: 0,
-        obj_subsurfaceScatter: 0
+        obj_subsurfaceScatter: 1
     });
 
     defaultScene();
