@@ -1,25 +1,27 @@
 <html>
-
-	<head>
-	<title>WebGL Path Tracing</title>
-	<meta charset ="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="chrome=1">  <!-- Use Chrome Frame in IE --> 
-	</head>
-
-	<body style="background:#000; color:white;">
-	 <div class="text" style=" text-align:center;"><h1>WebGL Path Tracing</h1></div>
-	<div style="width:512px; float:left">
-		<canvas id="canvas" style="border: none;" width="512" height="512" tabindex="1"></canvas>
-		<div id="message" style="display:block;text-align:center;"></div> <!-- Pixel offset to avoid FPS counter -->
-	</div>
-   <div style="width:50%; float:left; margin:20px;">
-	<input type = "button" value="Add Cube" onclick="addCube();"/>
-	<input type = "button" value="Add Sphere" onclick="addSphere();"/>
-    <input type = "button" value="Default Scene" onclick="defaultScene();"/>
-   </div>
-	
-	
-<script id="vs_pathTracer" type="x-shader/x-vertex">
+<head>
+    <title>WebGL Path Tracing</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!-- Use Chrome Frame in IE -->
+</head>
+<body style="background: #000; color: white;">
+    <div class="text" style="text-align: center;">
+        <h1>
+            WebGL Path Tracing</h1>
+    </div>
+    <div style="width: 512px; float: left">
+        <canvas id="canvas" style="border: none;" width="512" height="512" tabindex="1"></canvas>
+        <div id="message" style="display: block; text-align: center;">
+        </div>
+        <!-- Pixel offset to avoid FPS counter -->
+    </div>
+    <div style="width: 50%; float: left; margin: 20px;">
+        <input type="button" value="Add Cube" onclick="addCube();" />
+        <input type="button" value="Add Sphere" onclick="addSphere();" />
+        <input type="button" value="Default Scene" onclick="defaultScene();" />
+    </div>
+    <script id="vs_pathTracer" type="x-shader/x-vertex">
 precision highp float;
 
 attribute vec2 aVertex;
@@ -39,8 +41,8 @@ void main(void)
     InitRay = mix(mix(ray00, ray01, percent.y), mix(ray10, ray11, percent.y), percent.x);
 }
 
-</script>
-<script id="fs_pathTracer" type="x-shader/x-fragment">
+    </script>
+    <script id="fs_pathTracer" type="x-shader/x-fragment">
 precision highp float;
 
 #define PI 3.1415926585
@@ -326,10 +328,129 @@ float intersectCube(GEOM g, vec3 rStart, vec3 rDir, out float t, out vec3 normal
     vec3 realIntersectionPoint = (g.model *  vec4(P, 1.0)).xyz;
 
     pos = realIntersectionPoint;
-    normal = normalize(sign * (g.model * vec4(normal,0.0)).xyz);
+    normal = normalize(sign * (g.transinvmodel * vec4(normal,0.0)).xyz);
     return length(rStart - realIntersectionPoint);
 }
 
+
+float intersectCylinder(GEOM g, vec3 rStart, vec3 rDir, out float t, out vec3 normal, out vec3 pos){
+    float ELP = 0.000001;
+	vec3 NewP0 = (g.invmodel * vec4(rStart,1.0)).xyz;    //pos
+	vec3 NewV0 = (normalize(g.invmodel * vec4(rDir,0.0))).xyz;    //normal
+	NewV0=normalize(NewV0);
+
+	vec2 O = vec2(0.0,0.0);
+	vec2 NewV0_2 = vec2(NewV0[0],NewV0[2]);
+	vec2 NewP0_2 =vec2(NewP0[0],NewP0[2]);
+	float a=dot(NewV0_2,NewV0_2);
+	float b=dot(vec2(2.0*NewV0_2[0],2.0*NewV0_2[1]),NewP0_2-O);
+	float c=dot(NewP0_2-O,NewP0_2-O)-0.5*0.5;
+
+	float sign=1.0;
+	if(abs(NewP0[1])-0.5<0.0 && sqrt(dot(NewP0_2,NewP0_2))<0.5)
+		sign=-1.0;
+
+    
+	float t1=1000000.0;
+	float t2=1000000.0;
+	if(NewV0[1]==0.0)
+	{
+		if(NewP0[1]+0.5==0.0)
+		{
+			vec2 P = vec2(NewP0[0],NewP0[2]);
+			float c=dot(P-O,P-O)-0.5*0.5;
+			if(c<=0.0)
+				return -1.0;
+		}
+		if(NewP0[1]-0.5==0.0)
+		{
+			vec2 P = vec2(NewP0[0],NewP0[2]);
+			float c=dot(P-O,P-O)-0.5*0.5;
+			if(c<=0.0)
+				return -1.0;
+		}
+        
+	}
+	else
+	{
+		t1=(-0.5-NewP0[1])/NewV0[1];
+		if(t1>=0.0)
+		{
+			vec2 P = vec2(NewP0[0]+t1*NewV0[0],NewP0[2]+t1*NewV0[2]);
+			float c=dot(P-O,P-O)-0.5*0.5;
+			if(c>0.0)
+				t1=1000000.0;
+		}
+		else
+			t1=1000000.0;
+
+		t2=(0.5-NewP0[1])/NewV0[1];
+		if(t2>=0.0)
+		{
+			vec2 P = vec2(NewP0[0]+t2*NewV0[0],NewP0[2]+t2*NewV0[2]);
+			float c=dot(P-O,P-O)-0.5*0.5;
+			if(c>0.0)
+				t2=1000000.0;
+		}
+		else
+			t2=1000000.0;
+	}
+	
+   
+	t=1000000.0;
+	if(b*b-4.0*a*c>=0.0)
+	{
+		float t0=(-b-sqrt(b*b-4.0*a*c))/(2.0*a);
+		float t1=(-b+sqrt(b*b-4.0*a*c))/(2.0*a);
+		float temp;
+		if (t0 > t1) {
+			temp = t1;
+			t1 = t0;
+			t0 = temp;
+		}
+
+		if (t1 < -0.00001) 
+			return -1.0;
+		else if (t0 < -0.00001)
+			t=t1;
+		else
+			t=t0;
+
+		if(t>=0.0)
+		{
+			vec3 P=NewP0+t*NewV0;
+			if(P[1]>=-0.5&&P[1]<=0.5)
+			    t=t;
+			else
+				t=1000000.0;
+		}	
+		else
+			t=1000000.0;
+	}
+
+    
+	t=min(t,t1);
+	t=min(t,t2);
+	if(t!=1000000.0)
+	{
+		pos =NewP0+t*NewV0;
+
+		if(abs(pos[1]-0.5)<ELP)
+			normal = vec3(0.0,1.0,0.0);
+		else if(abs(pos[1]+0.5)<ELP)
+			normal = vec3(0.0,-1.0,0.0);
+		else
+			normal =vec3(pos[0],0.0,pos[2]);
+
+		normal = normalize(sign * (g.transinvmodel * vec4(normal,0.0)).xyz);
+
+        pos = (g.model *vec4(pos,1.0)).xyz;
+		return length(pos - rStart)/length(rDir);
+	}
+	
+	return -1.0;
+
+}
 
 bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
     float attw = attrtexsize.r;
@@ -351,14 +472,14 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
         float fiy = 0.0;
         temp.color = texture2D(attrtexture, vec2((7.0 * fix)/attw,0.0/atth)).rgb;
 
-        temp.type = int(2.0 * texture2D(attrtexture, vec2((7.0 * fix + 1.0)/attw,fiy/atth)).r);
+        temp.type = int(5.0 * texture2D(attrtexture, vec2((7.0 * fix + 1.0)/attw,fiy/atth)).r);
         temp.textureType = int(texture2D(attrtexture, vec2((7.0 * fix + 1.0)/attw,fiy/atth)).g);
 
-        temp.reflective = int(texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).r);
-        temp.refractive = int(texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).g);
+        temp.reflective = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).r);
+        temp.refractive = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).g);
         temp.reflectivity = texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).b;
 
-        temp.indexOfRefraction = texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).r;
+        temp.indexOfRefraction = 5.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).r;
         temp.subsurfaceScatter = int(texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).g);
         temp.emittance = int(25.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).b);
 
@@ -377,6 +498,10 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
 		if(temp.type == 0){
 			hitPointDistance = intersectSphere(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
 		}
+        else if(temp.type == 1)
+        {
+		    hitPointDistance = intersectCylinder(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
+        }
         else if(temp.type == 2)
         {
 		    hitPointDistance = intersectCube(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
@@ -386,7 +511,7 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
 		if(hitPointDistance > 0.0){
 			if(hitPointDistance < closestIntersectionDistance){
 				closestIntersectionDistance = hitPointDistance;
-				if(temp.type == 1)
+				if(temp.type == 6)
 					tempColor = planeColor;
 				else
 					tempColor = temp.color;
@@ -410,7 +535,7 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
 }
 
 
-float random(vec3 noise, float seed) {
+float getrandom(vec3 noise, float seed) {
 	return fract(sin(dot(InitRay + seed, noise)) * 43758.5453 + seed);
 }
 
@@ -423,8 +548,8 @@ highp float rand(vec2 co)
 	
 vec3 calculateRandomDirectionInHemisphere(float seed, vec3 normal) 
 {
-	float u = random(vec3(12.9898, 78.233, 151.7182), seed);
-	float v = random(vec3(63.7264, 10.873, 623.6736), seed);
+	float u = getrandom(vec3(12.9898, 78.233, 151.7182), seed);
+	float v = getrandom(vec3(63.7264, 10.873, 623.6736), seed);
 			
 	float up = sqrt(u); 
 	float over = sqrt(1.0 - up * up); 
@@ -445,6 +570,43 @@ vec3 calculateRandomDirectionInHemisphere(float seed, vec3 normal)
 	return ( up * normal ) + ( cos(around) * over * perpendicularDirection1 ) + ( sin(around) * over * perpendicularDirection2 );
 }
 
+struct Fresnel {
+  float reflectionCoefficient;
+  float transmissionCoefficient;
+};
+
+Fresnel calculateFresnel(vec3 normal, vec3 incident, float incidentIOR, float transmittedIOR) {
+	Fresnel fresnel;
+	incident = normalize(incident);
+	normal = normalize(normal);
+
+	if (incidentIOR <= 0.0 && transmittedIOR <= 0.0 ) { 
+		fresnel.reflectionCoefficient = 1.0;
+		fresnel.transmissionCoefficient = 0.0;
+		return fresnel;
+	}else{
+		float cosThetaI = abs(dot(normal, incident));
+		float sinIncidence = sqrt(1.0-pow(cosThetaI,2.0));
+		float cosThetaT = sqrt(1.0-pow(((incidentIOR/transmittedIOR)*sinIncidence),2.0));
+		float RsP = pow( (incidentIOR * cosThetaI - transmittedIOR * cosThetaT) / (incidentIOR * cosThetaI + transmittedIOR * cosThetaT) , 2.0);
+		float RpP = pow( (incidentIOR * cosThetaT - transmittedIOR * cosThetaI) / (incidentIOR * cosThetaT + transmittedIOR * cosThetaI) , 2.0);
+		fresnel.reflectionCoefficient = (RsP + RpP) / 2.0; 
+		fresnel.transmissionCoefficient = 1.0 - fresnel.reflectionCoefficient;
+		return fresnel;
+	}
+
+}
+
+vec3 refractdir(in vec3 I, in vec3 N,in float eta)
+{
+	float dotValue = dot(N, I);
+	float k = 1.0 - eta * eta * (1.0 - dotValue * dotValue);
+	if(k < 0.0)
+		return vec3(0.0);
+	else
+		return normalize(eta * I - (eta * dotValue + sqrt(k)) * N);
+}
+
 
 const int depth = 5;
 vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
@@ -454,10 +616,12 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
 	bool internalReflection = false;
 	bool reflective = false;
 	bool refractive = false;
-		
+	
+    float shift = 0.001;	
 	for (int i = 0; i <depth; ++i) {
 		INTERSECT intersect;
 		float dist = -1.0;
+        float seed = time + float(i);
         
 		if (intersectWorld(r, intersect,dist)) {	
 			if(intersect.emittance > 0)
@@ -466,15 +630,60 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
 				col = colorMask;	
 			    return col;   
 			}
+            else if(intersect.refractive > 0)
+            {
+                //vec3 random = vec3(rand(intersect.IntersectP.xy),rand(intersect.IntersectP.xz),rand(intersect.IntersectP.yz)) ;
+            	float oldIOR = r.IOR;
+	            float newIOR = clamp(intersect.indexOfRefraction,1.0,3.0);
+                Fresnel fresnel;
+
+                float reflect_range = -1.0;
+                //float IOR12 = clamp(oldIOR/newIOR,0.0,2.0);
+                vec3 reflectR = reflect(r.dir,intersect.IntersectN);
+                vec3 refractR = refractdir(r.dir,intersect.IntersectN,1.0);
+                fresnel = calculateFresnel(intersect.IntersectN,r.dir,oldIOR,newIOR);
+
+//                reflect_range =  fresnel.reflectionCoefficient;  
+
+//                float randomnum = getrandom(intersect.IntersectP,seed);
+//                if(randomnum <reflect_range)
+//                {
+//                    r.IOR = newIOR;
+//                    r.dir = reflectR;
+//                    r.origin = intersect.IntersectP + shift * r.dir;
+//                }
+//                else
+//                {
+//                    r.IOR = newIOR;
+//                    r.dir = reflectR;//refractR;
+//                    r.origin = intersect.IntersectP + shift * r.dir;
+//                }
+	
+                  r.IOR = newIOR;
+//                  if(length(reflectR)<0.5) 
+//                  {
+//                      return col;   	
+//                  }
+                  r.dir = refractR;
+                  r.origin = intersect.IntersectP + shift * r.dir;
+            }
+            else if(intersect.reflective > 0)
+            {
+                r.IOR = 1.0;               
+                r.dir = reflect(r.dir,intersect.IntersectN);// r.dir - 2.0 * dot(intersect.IntersectN, r.dir ) * intersect.IntersectN;
+                r.origin = intersect.IntersectP + shift * r.dir;
+            }
             else
             {//Non light object					      									
 				colorMask *= intersect.color;
 				col+= colorMask;																								
 				
 				float random = rand(intersect.IntersectP.xy);
-				r.dir = normalize(calculateRandomDirectionInHemisphere(time + float(i) + random, intersect.IntersectN));	
-                r.origin = intersect.IntersectP + r.dir*0.001;																			
+				r.dir = normalize(calculateRandomDirectionInHemisphere(seed + random, intersect.IntersectN));	
+                r.origin = intersect.IntersectP + r.dir * shift;																			
 			}
+
+
 		}
         else{
 			col = vec3(0.0,0.0,0.0);
@@ -501,8 +710,8 @@ void main(void)
 	gl_FragColor = vec4(mix( finalCol/5.0, texCol,u_iterations / (1.0+u_iterations)), 1.0);
 }
 
-</script>
-<script id="vs_render" type="x-shader/x-vertex">
+    </script>
+    <script id="vs_render" type="x-shader/x-vertex">
 
 precision highp float;
 
@@ -516,8 +725,8 @@ void main(void)
    gl_Position = vec4(aVertex, 1.0);
 }
 
-</script>
-<script id="fs_render" type="x-shader/x-fragment">
+    </script>
+    <script id="fs_render" type="x-shader/x-fragment">
 precision highp float;
 
 uniform sampler2D texture;
@@ -528,12 +737,11 @@ void main(void)
     gl_FragColor = texture2D(texture, v_texCoord);
 }
 
-</script>
-<script src ="js/lib/gl-matrix.js" type ="text/javascript"></script>
-<script src="js/lib/stats.min.js" type="text/javascript" ></script>
-<script src="js/lib/dat.gui.min.js" type="text/javascript"></script>
-<script src ="js/webGLUtility.js" type ="text/javascript"></script>
-<script src ="js/WebGL_Path_Tracer.js" type ="text/javascript"></script>
+    </script>
+    <script src="js/lib/gl-matrix.js" type="text/javascript"></script>
+    <script src="js/lib/stats.min.js" type="text/javascript"></script>
+    <script src="js/lib/dat.gui.min.js" type="text/javascript"></script>
+    <script src="js/webGLUtility.js" type="text/javascript"></script>
+    <script src="js/WebGL_Path_Tracer.js" type="text/javascript"></script>
 </body>
-
 </html>

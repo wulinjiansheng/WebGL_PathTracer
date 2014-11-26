@@ -253,12 +253,12 @@ function AddObjsAttr(i) {
     gl.useProgram(shaderProgram);
     //color:No need for map
     attributes[28 * i + 0] = 255.0 * Datas[i].obj_color[0]; attributes[28 * i + 1] = 255.0 * Datas[i].obj_color[1]; attributes[28 * i + 2] = 255.0 * Datas[i].obj_color[2]; attributes[28 * i + 3] = 255.0;
-    //objtype:[0.0,2.0] to [0,255] 
-    attributes[28 * i + 4] = 255.0 * Datas[i].obj_type /2.0; attributes[28 * i + 5] = 255.0 * Datas[i].obj_textureType; attributes[28 * i + 6] = 255.0; attributes[28 * i + 7] = 255.0;
+    //objtype:[0.0,5.0] to [0,255] 
+    attributes[28 * i + 4] = 255.0 * Datas[i].obj_type /5.0; attributes[28 * i + 5] = 255.0 * Datas[i].obj_textureType; attributes[28 * i + 6] = 255.0; attributes[28 * i + 7] = 255.0;
     //mat1:No need for map
     attributes[28 * i + 8] = 255.0 * Datas[i].obj_reflective; attributes[28 * i + 9] = 255.0 * Datas[i].obj_refractive; attributes[28 * i + 10] = 255.0 * Datas[i].obj_reflectivity; attributes[28 * i + 11] = 255.0;
-    //mat2:No need for map emittance [0,25]to [0,255]
-    attributes[28 * i + 12] = 255.0 * Datas[i].obj_indexOfRefraction; attributes[28 * i + 13] = 255.0 * Datas[i].obj_subsurfaceScatter; attributes[28 * i + 14] = 255.0 * Datas[i].obj_emittance/25.0; attributes[28 * i + 15] = 255.0;
+    //mat2:IOR[0,3] to [0,255]  emittance [0,25] to [0,255]
+    attributes[28 * i + 12] = 255.0/5.0 * Datas[i].obj_indexOfRefraction; attributes[28 * i + 13] = 255.0 * Datas[i].obj_subsurfaceScatter; attributes[28 * i + 14] = 255.0 * Datas[i].obj_emittance/25.0; attributes[28 * i + 15] = 255.0;
     //pos:[-10.0,10.0] to [0,255]
     var mind = -10.0;
     var maxd = 10.0;
@@ -269,10 +269,6 @@ function AddObjsAttr(i) {
     //scale:[0.0,10.0] to [0,255]
     attributes[28 * i + 24] = 255.0 * Datas[i].obj_scale[0] / 10.0; attributes[28 * i + 25] = 255.0 * Datas[i].obj_scale[1] / 10.0; attributes[28 * i + 26] = 255.0 * Datas[i].obj_scale[2] / 10.0; attributes[28 * i + 27] = 255.0;
 
-    for (var j = 0; j < 100; j = j + 1) 
-    {
-        attributes[j] = attributes[j];
-    }
 }
 
 function addCube() {
@@ -432,9 +428,9 @@ function initDfaultScene() {
 
 	//Box
 	DefaultDatas.push({
-		obj_pos: [2.0, 0.0, 0.0],
-		obj_scale: [1.8, 1.8, 1.8],
-		obj_rotation: [40.0, 40.0, 0.0],
+		obj_pos: [0.0, -1.5, 0.0],
+		obj_scale: [6.8, 0.2, 4.8],
+		obj_rotation: [0.0, 0.0, 0.0],
 		obj_color: [0.8, 0.8, 0.8],
 		obj_type: 2,
 		obj_textureType: 0,
@@ -446,11 +442,73 @@ function initDfaultScene() {
 		obj_subsurfaceScatter: 0
     });
 
-    //Sphere
+//Cylinder
+    var legpos1 = 3.0,legpos2 = 1.8;
+    DefaultDatas.push({
+        obj_pos: [legpos1, -3.5, legpos2],
+        obj_scale: [0.3, 4.0, 0.3],
+        obj_rotation: [0.0, 0.0, 0.0],
+        obj_color: [0.9, 0.4, 0.0],
+        obj_type: 1,
+        obj_textureType: 0,
+        obj_reflective: 0,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 0,
+        obj_subsurfaceScatter: 0
+    });
+
+    DefaultDatas.push({
+        obj_pos: [-legpos1, -3.5, legpos2],
+        obj_scale: [0.3, 4.0, 0.3],
+        obj_rotation: [0.0, 0.0, 0.0],
+        obj_color: [0.9, 0.4, 0.0],
+        obj_type: 1,
+        obj_textureType: 0,
+        obj_reflective: 0,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 0,
+        obj_subsurfaceScatter: 0
+    });
+
+    DefaultDatas.push({
+        obj_pos: [legpos1, -3.5, -legpos2],
+        obj_scale: [0.3, 4.0, 0.3],
+        obj_rotation: [0.0, 0.0, 0.0],
+        obj_color: [0.9, 0.4, 0.0],
+        obj_type: 1,
+        obj_textureType: 0,
+        obj_reflective: 0,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 0,
+        obj_subsurfaceScatter: 0
+    });
+
+    DefaultDatas.push({
+        obj_pos: [-legpos1, -3.5, -legpos2],
+        obj_scale: [0.3, 4.0, 0.3],
+        obj_rotation: [0.0, 0.0, 0.0],
+        obj_color: [0.9, 0.4, 0.0],
+        obj_type: 1,
+        obj_textureType: 0,
+        obj_reflective: 0,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 0,
+        obj_subsurfaceScatter: 0
+    });
+
+    //Sphere1
     DefaultDatas.push({
         obj_pos: [-2.0, 0.0, 0.0],
         obj_scale: [1.8, 1.8, 1.8],
-        obj_rotation: [40.0, 40.0, 0.0],
+        obj_rotation: [30.0, 4.0, 0.0],
         obj_color: [1.0, 0.0, 0.0],
         obj_type: 0,
         obj_textureType: 0,
@@ -458,6 +516,39 @@ function initDfaultScene() {
         obj_refractive: 0,
         obj_reflectivity: 1.0,
         obj_indexOfRefraction: 1.0,
+        obj_emittance: 0,
+        obj_subsurfaceScatter: 0
+    });
+
+    //Sphere2
+    DefaultDatas.push({
+        obj_pos: [0.0, 0.0, 0.0],
+        obj_scale: [1.8, 1.8, 1.8],
+        obj_rotation: [30.0, 4.0, 0.0],
+        obj_color: [1.0, 0.0, 0.0],
+        obj_type: 0,
+        obj_textureType: 0,
+        obj_reflective: 1,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 0,
+        obj_subsurfaceScatter: 0
+    });
+
+
+    //Sphere3
+    DefaultDatas.push({
+        obj_pos: [2.0, 0.0, 0.0],
+        obj_scale: [1.8, 1.8, 1.8],
+        obj_rotation: [30.0, 4.0, 0.0],
+        obj_color: [1.0, 0.0, 0.0],
+        obj_type: 0,
+        obj_textureType: 0,
+        obj_reflective: 1,
+        obj_refractive: 1,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.5,
         obj_emittance: 0,
         obj_subsurfaceScatter: 0
     });
