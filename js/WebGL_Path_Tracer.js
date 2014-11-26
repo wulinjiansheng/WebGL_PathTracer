@@ -20,7 +20,9 @@ eye.x = zoomZ * Math.sin(angleY) * Math.cos(angleX);
 eye.y = zoomZ * Math.sin(angleX);
 eye.z = zoomZ * Math.cos(angleY) * Math.cos(angleX);
 
+//Texture
 var textures;
+var objattrtex;
 
 //Vertex Shader
 var VertexLocation;
@@ -32,14 +34,16 @@ var u_numsLocation;
 var u_eyeLocation;
 var u_timeLocation;
 var u_itrLocation;
-var u_objcolorsLocation = [];
-var u_objtypesLocation = []; //type, textureType
-var u_objmat1Location = []; //reflective,refractive,reflectivity
-var u_objmat2Location = []; //indexOfRefraction,subsurfaceScatter, emittance
-var u_objmodelviewLocation = [];
-var u_objinvmodelviewLocation = [];
-var u_objinvtransmodelviewLocation = [];
+var u_textureLocation;
+var u_attrtextureLocation;
+var u_texsizeLocation;
+var u_attrtexsizeLocation;
 
+//Added for attrtexture
+//width and height must be pow(2,n)
+var attw = 1024;  //width
+var atth = 2; //height
+var attributes = new Uint8Array(attw * atth * 4);
 
 //render shader
 var renderProgram;
@@ -64,6 +68,7 @@ function runGL() {
 	initGL();
 	initBuffers();
 	initializeShader();
+
 	initDfaultScene();
 	animate();
 	
@@ -108,7 +113,6 @@ function initBuffers() {
 
 
 	frameBuffer = gl.createFramebuffer();
-
 	var type = gl.getExtension('OES_texture_float') ? gl.FLOAT : gl.UNSIGNED_BYTE;
 
 	textures = [];
@@ -117,11 +121,21 @@ function initBuffers() {
 		gl.bindTexture(gl.TEXTURE_2D, textures[i]);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 512, 512, 0, gl.RGB, type, null);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, canvas.width, canvas.height, 0, gl.RGB, type, null);
 	}
 	gl.bindTexture(gl.TEXTURE_2D, null);
 
+	objattrtex = gl.createTexture();
+	gl.bindTexture(gl.TEXTURE_2D, objattrtex);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+//	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+//	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT); //gl.CLAMP_TO_EDGE);
+//	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+//	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST); // ;
+
 }
+
 
 function initializeShader() {
 	//create render shader
@@ -152,6 +166,12 @@ function initializeShader() {
 	//Don't k why this line doesn't work
 	u_numsLocation = gl.getUniformLocation(shaderProgram, "objnums");
 	u_eyeLocation = gl.getUniformLocation(shaderProgram, "cameraPos");
+
+
+	u_textureLocation = gl.getUniformLocation(shaderProgram, "texture");
+	u_attrtextureLocation = gl.getUniformLocation(shaderProgram, "attrtexture");
+	u_texsizeLocation = gl.getUniformLocation(shaderProgram, "texsize");
+	u_attrtexsizeLocation = gl.getUniformLocation(shaderProgram, "attrtexsize");
 }
 
 function animate() {
@@ -190,13 +210,25 @@ function animate() {
 	gl.uniform1f(u_timeLocation, time);
 	gl.uniform1f(u_itrLocation, iterations);
 	gl.uniform1i(u_numsLocation, Datas.length);
+	//Added for texture size
+	gl.uniform2f(u_texsizeLocation, canvas.width,canvas.height);
+	gl.uniform2f(u_attrtexsizeLocation, attw, atth);
 
+	gl.activeTexture(gl.TEXTURE0);
 	gl.bindTexture(gl.TEXTURE_2D, textures[0]);
+	gl.uniform1i(u_textureLocation, 0);
+
+
+	gl.activeTexture(gl.TEXTURE1);  //attributes for objects
+	gl.bindTexture(gl.TEXTURE_2D, objattrtex);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, attw, atth, 0, gl.RGBA, gl.UNSIGNED_BYTE, attributes);
+	gl.uniform1i(u_attrtextureLocation, 1);
+
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
 	gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
 	gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[1], 0);
 	gl.vertexAttribPointer(VertexLocation, 2, gl.FLOAT, false, 0, 0);
-
+	
 
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -209,7 +241,6 @@ function animate() {
 	gl.vertexAttribPointer(renderVertexAttribute, 2, gl.FLOAT, false, 0, 0);
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-
 	iterations++;
 	time += 1.0;
 	window.requestAnimFrame(animate);
@@ -217,48 +248,31 @@ function animate() {
 
 ///////////////////////////////////////////////////////////////////////////
 
-function addObjsInShader(i){
-	gl.useProgram(shaderProgram);
-	
-	u_objcolorsLocation.push(gl.getUniformLocation(shaderProgram, "u_objcolors[" + i.toString(10) + "]"));
-	u_objtypesLocation.push(gl.getUniformLocation(shaderProgram, "u_objtypes[" + i.toString(10) + "]"));
-	u_objmat1Location.push(gl.getUniformLocation(shaderProgram, "u_objmat1[" + i.toString(10) + "]"));
-	u_objmat2Location.push(gl.getUniformLocation(shaderProgram, "u_objmat2[" + i.toString(10) + "]"));
-	u_objmodelviewLocation.push(gl.getUniformLocation(shaderProgram, "u_objmodelview[" + i.toString(10) + "]"));
-	u_objinvmodelviewLocation.push(gl.getUniformLocation(shaderProgram, "u_objinvmodelview[" + i.toString(10) + "]"));
-	u_objinvtransmodelviewLocation.push(gl.getUniformLocation(shaderProgram, "u_objinvtransmodelview[" + i.toString(10) + "]"));
-}
 
-function TransformObjs(i) {
+function AddObjsAttr(i) {
+    gl.useProgram(shaderProgram);
+    //color:No need for map
+    attributes[28 * i + 0] = 255.0 * Datas[i].obj_color[0]; attributes[28 * i + 1] = 255.0 * Datas[i].obj_color[1]; attributes[28 * i + 2] = 255.0 * Datas[i].obj_color[2]; attributes[28 * i + 3] = 255.0;
+    //objtype:[0.0,2.0] to [0,255] 
+    attributes[28 * i + 4] = 255.0 * Datas[i].obj_type /2.0; attributes[28 * i + 5] = 255.0 * Datas[i].obj_textureType; attributes[28 * i + 6] = 255.0; attributes[28 * i + 7] = 255.0;
+    //mat1:No need for map
+    attributes[28 * i + 8] = 255.0 * Datas[i].obj_reflective; attributes[28 * i + 9] = 255.0 * Datas[i].obj_refractive; attributes[28 * i + 10] = 255.0 * Datas[i].obj_reflectivity; attributes[28 * i + 11] = 255.0;
+    //mat2:No need for map emittance [0,25]to [0,255]
+    attributes[28 * i + 12] = 255.0 * Datas[i].obj_indexOfRefraction; attributes[28 * i + 13] = 255.0 * Datas[i].obj_subsurfaceScatter; attributes[28 * i + 14] = 255.0 * Datas[i].obj_emittance/25.0; attributes[28 * i + 15] = 255.0;
+    //pos:[-10.0,10.0] to [0,255]
+    var mind = -10.0;
+    var maxd = 10.0;
+    attributes[28 * i + 16] = 255.0 * (Datas[i].obj_pos[0] - mind) / (maxd - mind); attributes[28 * i + 17] = 255.0 * (Datas[i].obj_pos[1] - mind) / (maxd - mind);
+    attributes[28 * i + 18] = 255.0 * (Datas[i].obj_pos[2] - mind) / (maxd - mind); attributes[28 * i + 19] = 255.0;
+    //rot:[0.0,360.0] to [0,255]
+    attributes[28 * i + 20] = 255.0 * Datas[i].obj_rotation[0] / 360.0; attributes[28 * i + 21] = 255.0 * Datas[i].obj_rotation[1] / 360.0; attributes[28 * i + 22] = 255.0 * Datas[i].obj_rotation[2]/360.0; attributes[28 * i + 23] = 255.0;
+    //scale:[0.0,10.0] to [0,255]
+    attributes[28 * i + 24] = 255.0 * Datas[i].obj_scale[0] / 10.0; attributes[28 * i + 25] = 255.0 * Datas[i].obj_scale[1] / 10.0; attributes[28 * i + 26] = 255.0 * Datas[i].obj_scale[2] / 10.0; attributes[28 * i + 27] = 255.0;
 
-	gl.useProgram(shaderProgram);
-	
-	gl.uniform3f(u_objcolorsLocation[i], Datas[i].obj_color[0], Datas[i].obj_color[1], Datas[i].obj_color[2]);
-	gl.uniform2f(u_objtypesLocation[i], Datas[i].obj_type, Datas[i].obj_textureType);
-	gl.uniform3f(u_objmat1Location[i], Datas[i].obj_reflective, Datas[i].obj_refractive, Datas[i].obj_reflectivity);
-	gl.uniform3f(u_objmat2Location[i], Datas[i].obj_indexOfRefraction, Datas[i].obj_subsurfaceScatter, Datas[i].obj_emittance);
-
-	var modelv = mat4.create();
-	mat4.identity(modelv);
-	var objtrans = mat4.create();
-	var translatev = Datas[i].obj_pos;
-	mat4.translate(modelv, translatev, objtrans);
-	var rotangle = Datas[i].obj_rotation;
-	mat4.rotate(objtrans, rotangle[0] * Math.PI / 180.0, [1.0, 0.0, 0.0], objtrans);
-	mat4.rotate(objtrans, rotangle[1] * Math.PI / 180.0, [0.0, 1.0, 0.0], objtrans);
-	mat4.rotate(objtrans, rotangle[2] * Math.PI / 180.0, [0.0, 0.0, 1.0], objtrans);
-	var scalev = Datas[i].obj_scale;
-	mat4.scale(objtrans, scalev, objtrans);
-
-	var inversmodelv = mat4.create();
-	mat4.inverse(objtrans, inversmodelv);
-
-	var transinversmodelv = mat4.create();
-	mat4.transpose(inversmodelv, transinversmodelv);
-
-	gl.uniformMatrix4fv(u_objmodelviewLocation[i], false, objtrans);
-	gl.uniformMatrix4fv(u_objinvmodelviewLocation[i], false, inversmodelv);
-	gl.uniformMatrix4fv(u_objinvtransmodelviewLocation[i], false, transinversmodelv);
+    for (var j = 0; j < 100; j = j + 1) 
+    {
+        attributes[j] = attributes[j];
+    }
 }
 
 function addCube() {
@@ -277,8 +291,7 @@ function addCube() {
 		obj_subsurfaceScatter: 0
 	});
 
-    addObjsInShader(Datas.length - 1);
-	TransformObjs(Datas.length-1);
+    AddObjsAttr(Datas.length - 1);
 		
 	iterations = 0;
 }
@@ -299,13 +312,124 @@ function addSphere() {
 		obj_subsurfaceScatter: 0
 	});
 
-    addObjsInShader(Datas.length - 1);
-	TransformObjs(Datas.length-1);
+    AddObjsAttr(Datas.length - 1);
 		
 	iterations = 0;
 }
 
 function initDfaultScene() {
+    //Walls
+    var WallScale = 10.0;
+    var WallTrans = 5.0; 
+    DefaultDatas.push({
+        obj_pos: [0.0, 0.0, -WallTrans],
+        obj_scale: [WallScale, WallScale, 0.1],
+        obj_rotation: [0.0, 0.0, 0.0],
+        obj_color: [1.0, 1.0, 1.0],
+        obj_type: 2,
+        obj_textureType: 0,
+        obj_reflective: 0,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 0,
+        obj_subsurfaceScatter: 0
+    });
+
+    DefaultDatas.push({
+        obj_pos: [-WallTrans, 0.0, 0.0],
+        obj_scale: [ 0.1,WallScale, WallScale],
+        obj_rotation: [0.0, 0.0, 0.0],
+        obj_color: [0.75, 0.25, 0.25],
+        obj_type: 2,
+        obj_textureType: 0,
+        obj_reflective: 0,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 0,
+        obj_subsurfaceScatter: 0
+    });
+
+    DefaultDatas.push({
+        obj_pos: [WallTrans, 0.0, 0.0],
+        obj_scale: [0.1, WallScale, WallScale],
+        obj_rotation: [0.0, 0.0, 0.0],
+        obj_color: [0.25, 0.25, 0.75],
+        obj_type: 2,
+        obj_textureType: 0,
+        obj_reflective: 0,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 0,
+        obj_subsurfaceScatter: 0
+    });
+
+    DefaultDatas.push({
+        obj_pos: [WallTrans, 0.0, 0.0],
+        obj_scale: [0.1, WallScale, WallScale],
+        obj_rotation: [0.0, 0.0, 0.0],
+        obj_color: [0.25, 0.25, 0.75],
+        obj_type: 2,
+        obj_textureType: 0,
+        obj_reflective: 0,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 0,
+        obj_subsurfaceScatter: 0
+    });
+
+
+    DefaultDatas.push({
+        obj_pos: [0.0, WallTrans, 0.0],
+        obj_scale: [WallScale, 0.1, WallScale],
+        obj_rotation: [0.0, 0.0, 0.0],
+        obj_color: [0.75, 0.75, 0.75],
+        obj_type: 2,
+        obj_textureType: 0,
+        obj_reflective: 0,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 0,
+        obj_subsurfaceScatter: 0
+    });
+
+    DefaultDatas.push({
+        obj_pos: [0.0, -WallTrans, 0.0],
+        obj_scale: [WallScale, 0.1, WallScale],
+        obj_rotation: [0.0, 0.0, 0.0],
+        obj_color: [0.75, 0.75, 0.75],
+        obj_type: 2,
+        obj_textureType: 0,
+        obj_reflective: 0,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 0,
+        obj_subsurfaceScatter: 0
+    });
+
+    //Light
+    DefaultDatas.push({
+        obj_pos: [0.0, 4.95, 0.0],
+        obj_scale: [3.8, 0.1, 3.8],
+        obj_rotation: [0.0, 0.0, 0.0],
+        obj_color: [1.0, 1.0, 1.0],
+        obj_type: 2,
+        obj_textureType: 0,
+        obj_reflective: 0,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 25,
+        obj_subsurfaceScatter: 0
+    });
+
+
+
 	//Box
 	DefaultDatas.push({
 		obj_pos: [2.0, 0.0, 0.0],
@@ -320,12 +444,25 @@ function initDfaultScene() {
 		obj_indexOfRefraction: 1.0,
 		obj_emittance: 0,
 		obj_subsurfaceScatter: 0
-	});
+    });
 
-    for (var i = 0; i < DefaultDatas.length; i++)
-        addObjsInShader(i);
+    //Sphere
+    DefaultDatas.push({
+        obj_pos: [-2.0, 0.0, 0.0],
+        obj_scale: [1.8, 1.8, 1.8],
+        obj_rotation: [40.0, 40.0, 0.0],
+        obj_color: [1.0, 0.0, 0.0],
+        obj_type: 0,
+        obj_textureType: 0,
+        obj_reflective: 0,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 0,
+        obj_subsurfaceScatter: 0
+    });
 
-	defaultScene();
+    defaultScene();
 }
 
 function defaultScene() {
@@ -333,7 +470,7 @@ function defaultScene() {
 	
 	for (var i = 0; i < DefaultDatas.length; i++) {
 			Datas[i] = DefaultDatas[i];
-			TransformObjs(i);
+			AddObjsAttr(i);
 	}
 	
 	iterations = 0;
