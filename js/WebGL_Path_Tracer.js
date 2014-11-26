@@ -38,12 +38,15 @@ var u_textureLocation;
 var u_attrtextureLocation;
 var u_texsizeLocation;
 var u_attrtexsizeLocation;
+var u_SSAALocation;
 
 //Added for attrtexture
 //width and height must be pow(2,n)
 var attw = 1024;  //width
 var atth = 2; //height
 var attributes = new Uint8Array(attw * atth * 4);
+//bool for SSAA
+var SSAA = 1;
 
 //render shader
 var renderProgram;
@@ -172,6 +175,7 @@ function initializeShader() {
 	u_attrtextureLocation = gl.getUniformLocation(shaderProgram, "attrtexture");
 	u_texsizeLocation = gl.getUniformLocation(shaderProgram, "texsize");
 	u_attrtexsizeLocation = gl.getUniformLocation(shaderProgram, "attrtexsize");
+	u_SSAALocation = gl.getUniformLocation(shaderProgram, "SSAA");
 }
 
 function animate() {
@@ -210,6 +214,7 @@ function animate() {
 	gl.uniform1f(u_timeLocation, time);
 	gl.uniform1f(u_itrLocation, iterations);
 	gl.uniform1i(u_numsLocation, Datas.length);
+	gl.uniform1i(u_SSAALocation, SSAA);
 	//Added for texture size
 	gl.uniform2f(u_texsizeLocation, canvas.width,canvas.height);
 	gl.uniform2f(u_attrtexsizeLocation, attw, atth);
@@ -258,7 +263,7 @@ function AddObjsAttr(i) {
     //mat1:No need for map
     attributes[28 * i + 8] = 255.0 * Datas[i].obj_reflective; attributes[28 * i + 9] = 255.0 * Datas[i].obj_refractive; attributes[28 * i + 10] = 255.0 * Datas[i].obj_reflectivity; attributes[28 * i + 11] = 255.0;
     //mat2:IOR[0,3] to [0,255]  emittance [0,25] to [0,255]
-    attributes[28 * i + 12] = 255.0/5.0 * Datas[i].obj_indexOfRefraction; attributes[28 * i + 13] = 255.0 * Datas[i].obj_subsurfaceScatter; attributes[28 * i + 14] = 255.0 * Datas[i].obj_emittance/25.0; attributes[28 * i + 15] = 255.0;
+    attributes[28 * i + 12] = 255.0/3.0 * Datas[i].obj_indexOfRefraction; attributes[28 * i + 13] = 255.0 * Datas[i].obj_subsurfaceScatter; attributes[28 * i + 14] = 255.0 * Datas[i].obj_emittance/25.0; attributes[28 * i + 15] = 255.0;
     //pos:[-10.0,10.0] to [0,255]
     var mind = -10.0;
     var maxd = 10.0;

@@ -52,6 +52,7 @@ precision highp float;
 uniform float time;
 uniform int objnums;
 uniform vec3 cameraPos;
+uniform int SSAA;
 
 uniform float u_iterations;
 uniform sampler2D texture;
@@ -257,7 +258,7 @@ float intersectSphere(GEOM g, vec3 rStart, vec3 rDir, out float t,  out vec3 nor
 	vec3 realOrigin = (g.model * vec4(0,0,0,1)).xyz;
 
     pos = realIntersectionPoint;
-	normal = normalize(sign*(realIntersectionPoint - realOrigin));
+	normal = sign*normalize((realIntersectionPoint - realOrigin));
 
     return length(rStart - realIntersectionPoint);
 }
@@ -328,7 +329,7 @@ float intersectCube(GEOM g, vec3 rStart, vec3 rDir, out float t, out vec3 normal
     vec3 realIntersectionPoint = (g.model *  vec4(P, 1.0)).xyz;
 
     pos = realIntersectionPoint;
-    normal = normalize(sign * (g.transinvmodel * vec4(normal,0.0)).xyz);
+    normal = sign * normalize((g.transinvmodel * vec4(normal,0.0)).xyz);
     return length(rStart - realIntersectionPoint);
 }
 
@@ -442,7 +443,7 @@ float intersectCylinder(GEOM g, vec3 rStart, vec3 rDir, out float t, out vec3 no
 		else
 			normal =vec3(pos[0],0.0,pos[2]);
 
-		normal = normalize(sign * (g.transinvmodel * vec4(normal,0.0)).xyz);
+		normal = sign * normalize((g.transinvmodel * vec4(normal,0.0)).xyz);
 
         pos = (g.model *vec4(pos,1.0)).xyz;
 		return length(pos - rStart)/length(rDir);
@@ -479,7 +480,7 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
         temp.refractive = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).g);
         temp.reflectivity = texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).b;
 
-        temp.indexOfRefraction = 5.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).r;
+        temp.indexOfRefraction = 1.0 + 3.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).r;
         temp.subsurfaceScatter = int(texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).g);
         temp.emittance = int(25.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).b);
 
@@ -579,15 +580,15 @@ Fresnel calculateFresnel(vec3 normal, vec3 incident, float incidentIOR, float tr
 	Fresnel fresnel;
 	incident = normalize(incident);
 	normal = normalize(normal);
-
-	if (incidentIOR <= 0.0 && transmittedIOR <= 0.0 ) { 
+    float cosThetaI = abs(dot(normal, incident));
+    float sinIncidence = sqrt(1.0-pow(cosThetaI,2.0));
+    float cosThetaT = sqrt(1.0-pow(((incidentIOR/transmittedIOR)*sinIncidence),2.0));
+	if (cosThetaT <= 0.0 ) { 
 		fresnel.reflectionCoefficient = 1.0;
 		fresnel.transmissionCoefficient = 0.0;
 		return fresnel;
 	}else{
-		float cosThetaI = abs(dot(normal, incident));
-		float sinIncidence = sqrt(1.0-pow(cosThetaI,2.0));
-		float cosThetaT = sqrt(1.0-pow(((incidentIOR/transmittedIOR)*sinIncidence),2.0));
+
 		float RsP = pow( (incidentIOR * cosThetaI - transmittedIOR * cosThetaT) / (incidentIOR * cosThetaI + transmittedIOR * cosThetaT) , 2.0);
 		float RpP = pow( (incidentIOR * cosThetaT - transmittedIOR * cosThetaI) / (incidentIOR * cosThetaT + transmittedIOR * cosThetaI) , 2.0);
 		fresnel.reflectionCoefficient = (RsP + RpP) / 2.0; 
@@ -617,7 +618,7 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
 	bool reflective = false;
 	bool refractive = false;
 	
-    float shift = 0.001;	
+    float shift = 0.01;	
 	for (int i = 0; i <depth; ++i) {
 		INTERSECT intersect;
 		float dist = -1.0;
@@ -632,40 +633,33 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
 			}
             else if(intersect.refractive > 0)
             {
-                //vec3 random = vec3(rand(intersect.IntersectP.xy),rand(intersect.IntersectP.xz),rand(intersect.IntersectP.yz)) ;
+                vec3 random = vec3(rand(intersect.IntersectP.xy),rand(intersect.IntersectP.xz),rand(intersect.IntersectP.yz)) ;
             	float oldIOR = r.IOR;
-	            float newIOR = clamp(intersect.indexOfRefraction,1.0,3.0);
+	            float newIOR = intersect.indexOfRefraction;
+
                 Fresnel fresnel;
 
                 float reflect_range = -1.0;
-                //float IOR12 = clamp(oldIOR/newIOR,0.0,2.0);
+                float IOR12 = oldIOR/newIOR;
                 vec3 reflectR = reflect(r.dir,intersect.IntersectN);
-                vec3 refractR = refractdir(r.dir,intersect.IntersectN,1.0);
+                vec3 refractR = refractdir(-r.dir,intersect.IntersectN,IOR12);
                 fresnel = calculateFresnel(intersect.IntersectN,r.dir,oldIOR,newIOR);
 
-//                reflect_range =  fresnel.reflectionCoefficient;  
+                reflect_range =  fresnel.reflectionCoefficient;  
 
-//                float randomnum = getrandom(intersect.IntersectP,seed);
-//                if(randomnum <reflect_range)
-//                {
-//                    r.IOR = newIOR;
-//                    r.dir = reflectR;
-//                    r.origin = intersect.IntersectP + shift * r.dir;
-//                }
-//                else
-//                {
-//                    r.IOR = newIOR;
-//                    r.dir = reflectR;//refractR;
-//                    r.origin = intersect.IntersectP + shift * r.dir;
-//                }
-	
-                  r.IOR = newIOR;
-//                  if(length(reflectR)<0.5) 
-//                  {
-//                      return col;   	
-//                  }
-                  r.dir = refractR;
-                  r.origin = intersect.IntersectP + shift * r.dir;
+                float randomnum = getrandom(random,seed);
+                if(randomnum <reflect_range)
+                {
+                    r.IOR = newIOR;
+                    r.dir = reflectR;
+                    r.origin = intersect.IntersectP + shift * r.dir;
+                }
+                else
+                {
+                    r.IOR = newIOR;
+                    r.dir = refractR;
+                    r.origin = intersect.IntersectP + shift * r.dir;
+                }
             }
             else if(intersect.reflective > 0)
             {
@@ -700,11 +694,20 @@ void main(void)
 	RAY r;
 	r.origin = cameraPos.xyz;
 	r.dir = normalize(InitRay);
+    if(SSAA>0)
+    {
+        float u = 0.001 * sin( getrandom(vec3(12.9898, 78.233, 151.7182), time) );
+	    float v = 0.001 * sin( getrandom(vec3(63.7264, 10.873, 623.6736), time+1.0) );
+        r.dir = normalize( InitRay + vec3(u,v,0));
+    }
+
 	r.IOR = 1.0;		
     r.raycolor = vec3(1.0,1.0,1.0);
 
 	vec3 finalCol = vec3(0.0); 
 	pathTrace(r, 1, finalCol);
+
+
 
 	vec3 texCol = texture2D(texture, vec2(gl_FragCoord.x / texsize.r,gl_FragCoord.y / texsize.g) ).rgb;
 	gl_FragColor = vec4(mix( finalCol/5.0, texCol,u_iterations / (1.0+u_iterations)), 1.0);
