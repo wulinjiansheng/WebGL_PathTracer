@@ -69,7 +69,7 @@ function runGL() {
 	initGL();
 	initBuffers();
 	initializeShader();
-
+	initGUI();
 	initDfaultScene();
 	animate();
 	
@@ -79,7 +79,7 @@ function runGL() {
 	document.onmouseup = handleMouseUp;
 	document.onmousemove = handleMouseMove;
 	
-	initGUI();
+	
 	
 }
 
@@ -319,6 +319,31 @@ function addSphere() {
     AddObjsAttr(Datas.length - 1);
 
     GUIAddObj("Sphere " + ++sphereNum, Datas.length - 1);	
+
+	iterations = 0;
+}
+
+var cylinderNum = 0;
+
+function addCylinder(){
+	Datas.push({
+		obj_pos: [Math.random()*10-5, Math.random()*10-5, Math.random()*10-5],
+		obj_scale: [1.0, 1.0, 1.0],
+		obj_rotation: [Math.random()*360, Math.random()*360, Math.random()*360],
+		obj_color: [Math.random(), Math.random(), Math.random()],
+		obj_type: 1,
+		obj_textureType: 0,
+		obj_reflective: 0,
+		obj_refractive: 0,
+		obj_reflectivity: 1.0,
+		obj_indexOfRefraction: 1.0,
+		obj_emittance: 0,
+		obj_subsurfaceScatter: 0
+	});
+
+    AddObjsAttr(Datas.length - 1);
+
+    GUIAddObj("Cylinder " + ++cylinderNum, Datas.length - 1);	
 
 	iterations = 0;
 }
@@ -575,6 +600,12 @@ function defaultScene() {
 	}
 	
 	iterations = 0;
+	
+	var node = document.getElementById("gui2");
+	if (node != null)
+		node.parentNode.removeChild(node);
+	
+	GUIDefaultScene();
 }
 
 function resize() {
@@ -732,8 +763,16 @@ function initGUI() {
      gui1.add(guiConfig, 'height').onChange(function () {
         height = guiConfig.height;
     });
+}
 
-    gui2 = new dat.GUI({ autoPlace: false });
+function GUIConfig() {
+    this.width = canvas.width;
+    this.height = canvas.height;
+}
+
+function GUIDefaultScene(){
+	gui2 = new dat.GUI({ autoPlace: false });
+	gui2.domElement.id = 'gui2';
     var container = document.getElementById('gui-left');
     container.appendChild(gui2.domElement);
 
@@ -741,11 +780,6 @@ function initGUI() {
     GUIAddObj("Sphere 1", 12);
     GUIAddObj("Sphere 2", 13);
     GUIAddObj("Sphere 3", 14);
-}
-
-function GUIConfig() {
-    this.width = canvas.width;
-    this.height = canvas.height;
 }
 
 function GUIObj(id) {
@@ -759,11 +793,19 @@ function GUIObj(id) {
     this.rotateY = Datas[id].obj_rotation[1];
     this.rotateZ = Datas[id].obj_rotation[2];
     this.color = [Datas[id].obj_color[0] * 255.0, Datas[id].obj_color[1] * 255.0, Datas[id].obj_color[2] * 255.0];
+<<<<<<< HEAD
     this.reflect = (Datas[id].obj_reflective == 1) ? true : false;
     this.refract = (Datas[id].obj_refractive == 1) ? true : false;
     this.IOR = Datas[id].obj_indexOfRefraction;
     this.emittance = Datas[id].obj_emittance;
     this.scatter = (Datas[id].obj_subsurfaceScatter == 1) ? true : false;
+=======
+    this.reflect = (Datas[id].obj_reflective == 1) ? true : false ;
+    this.refract = (Datas[id].obj_refractive == 1) ? true : false ;
+    this.IOR = Datas[id].obj_indexOfRefraction;
+    this.emittance = Datas[id].obj_emittance;
+    this.scatter = (Datas[id].obj_subsurfaceScatter == 1) ? true : false ;
+>>>>>>> bd7e1e3173aabe75f0c4bcd8789878180e08ae4e
 };
 
 function GUIAddObj(name, id) {
@@ -832,7 +874,7 @@ function GUIAddObj(name, id) {
         AddObjsAttr(id);
         iterations = 0;
     });
-    folder.add(guiObjs[i], 'IOR').onChange(function () {
+    folder.add(guiObjs[i], 'IOR').min(1).onChange(function () {
         Datas[id].obj_indexOfRefraction = guiObjs[i].IOR;
         AddObjsAttr(id);
         iterations = 0;
