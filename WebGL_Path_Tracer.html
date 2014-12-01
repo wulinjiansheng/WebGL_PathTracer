@@ -10,11 +10,11 @@
         #convasContainer{float: left;}
         #canvas{border: none; margin-left:20px;}
         #message{text-align: center;}
-        #controller{ width:490px; float: right;}
+        #controller{ width:500px; float: right;}
         .buttons{line-height:25px; background:#dad5cb; border:0; padding:0;}
-        input[type="button"]{margin-right:5px; margin-top:1px; border:1px solid transparent; border-radius:2px; font-size:11px; line-height:7px; background:#c5bdad; color:black; padding:4px 4px 5px 4px; cursor:pointer; display:inline-block; text-shadow: 0 1px 0 #b0a58f; box-shadow:0 -1px 0 #b0a58f;}
+        input[type="button"]{margin-left:5px; margin-top:1px; border:1px solid transparent; border-radius:2px; font-size:11px; line-height:7px; background:#c5bdad; color:black; padding:4px 4px 5px 4px; cursor:pointer; display:inline-block; text-shadow: 0 1px 0 #b0a58f; box-shadow:0 -1px 0 #b0a58f;}
         input[type="button"]:hover{background:#c5bdad;}
-        #gui-right, #gui-left{ width:245px; float:left;}
+        #gui-right, #gui-left{ width:245px; float:left; margin-left:5px;}
     </style>
 </head>
 <body>
@@ -32,6 +32,7 @@
             <div class="buttons">
                 <input type="button" value="Add Cube" onclick="addCube();" />
                 <input type="button" value="Add Sphere" onclick="addSphere();" />
+				<input type="button" value="Add Cylinder" onclick="addCylinder();" />
             </div>
         </div>
         <div id = "gui-right">
