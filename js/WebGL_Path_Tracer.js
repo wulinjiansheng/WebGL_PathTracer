@@ -758,8 +758,7 @@ function GUIObj(id) {
     this.rotateX = Datas[id].obj_rotation[0];
     this.rotateY = Datas[id].obj_rotation[1];
     this.rotateZ = Datas[id].obj_rotation[2];
-    var orgColor = [Datas[id].obj_color[0] * 255.0, Datas[id].obj_color[1] * 255.0, Datas[id].obj_color[2] * 255.0];
-    this.color = orgColor;
+    this.color = [Datas[id].obj_color[0] * 255.0, Datas[id].obj_color[1] * 255.0, Datas[id].obj_color[2] * 255.0];
     this.reflect = Datas[id].obj_reflective;
     this.refract = Datas[id].obj_refractive;
     this.IOR = Datas[id].obj_indexOfRefraction;
@@ -819,8 +818,7 @@ function GUIAddObj(name, id) {
         iterations = 0;
     });
     folder.addColor(guiObjs[i], 'color').onChange(function () {
-        var newColor = [guiObjs[i].color[0] / 255.0, guiObjs[i].color[1] / 255.0, guiObjs[i].color[2] / 255.0];
-        Datas[id].obj_color = newColor;
+        Datas[id].obj_color = [guiObjs[i].color[0] / 255.0, guiObjs[i].color[1] / 255.0, guiObjs[i].color[2] / 255.0];
         AddObjsAttr(id);
         iterations = 0;
     });
