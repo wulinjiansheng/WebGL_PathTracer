@@ -63,8 +63,6 @@ var DefaultDatas = [];
 //Added
 var stats = initStats();
 
-var gui = new dat.GUI();
-
 ///////////////////////////////////////////////////////////////////////////
 
 function runGL() {
@@ -276,6 +274,7 @@ function AddObjsAttr(i) {
 
 }
 
+var cubeNum = 0;
 function addCube() {
 	Datas.push({
 		obj_pos: [Math.random()*10-5, Math.random()*10-5, Math.random()*10-5],
@@ -293,9 +292,13 @@ function addCube() {
 	});
 
     AddObjsAttr(Datas.length - 1);
+
+    GUIAddObj("Cube " + ++cubeNum, Datas.length - 1);
 		
 	iterations = 0;
 }
+
+var sphereNum = 3;
 
 function addSphere() {
 	Datas.push({
@@ -314,7 +317,9 @@ function addSphere() {
 	});
 
     AddObjsAttr(Datas.length - 1);
-		
+
+    GUIAddObj("Sphere " + ++sphereNum, Datas.length - 1);	
+
 	iterations = 0;
 }
 
@@ -572,6 +577,33 @@ function defaultScene() {
 	iterations = 0;
 }
 
+function resize() {
+	canvas.height = width;
+	canvas.width = height;
+	
+	gl.viewport(0, 0, canvas.width, canvas.height);
+	
+	var type = gl.getExtension('OES_texture_float') ? gl.FLOAT : gl.UNSIGNED_BYTE;
+
+	gl.activeTexture(gl.TEXTURE0);
+	gl.bindTexture(gl.TEXTURE_2D, textures[0]);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, canvas.width, canvas.height, 0, gl.RGB, type, null);
+	
+	gl.bindTexture(gl.TEXTURE_2D, textures[1]);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, canvas.width, canvas.height, 0, gl.RGB, type, null);
+	
+	gl.bindTexture(gl.TEXTURE_2D, null);
+	
+	iterations = 0;
+}
 
 
 
@@ -675,16 +707,146 @@ function handleMouseMove(event) {
 
 /////////////////////////////////////////////////////////////////////////
 /*******************************GUI*************************************/
-var minColor = [1, 1, 1];
-function initUI() {
-    var guiConfig = new GUIConfig();
+//gui
+var gui1;
+var guiConfig;
 
-    // gui.addColor(guiConfig, 'minColor').onChange(function () {
-    // //minColor = cong.minColor;
-    // });
+var gui2;
+var guiObjs = [];
+
+var width;
+var height;
+
+function initGUI() {
+    //gui
+    //gui = new dat.GUI();    
+    gui1 = new dat.GUI({ autoPlace: false });
+    var container = document.getElementById('gui-right');
+    container.appendChild(gui1.domElement);
+
+    guiConfig = new GUIConfig();
+
+    gui1.add(guiConfig, 'width').onChange(function () {
+        width = guiConfig.width;
+    });
+     gui1.add(guiConfig, 'height').onChange(function () {
+        height = guiConfig.height;
+    });
+
+    gui2 = new dat.GUI({ autoPlace: false });
+    var container = document.getElementById('gui-left');
+    container.appendChild(gui2.domElement);
+
+    GUIAddObj("Light", 0);
+    GUIAddObj("Sphere 1", 12);
+    GUIAddObj("Sphere 2", 13);
+    GUIAddObj("Sphere 3", 14);
 }
 
 function GUIConfig() {
-    //this.minColor = minColor; // RGB array
+    this.width = canvas.width;
+    this.height = canvas.height;
 }
 
+function GUIObj(id) {
+    this.translateX = Datas[id].obj_pos[0];
+    this.translateY = Datas[id].obj_pos[1];
+    this.translateZ = Datas[id].obj_pos[2];
+    this.scaleX = Datas[id].obj_scale[0];
+    this.scaleY = Datas[id].obj_scale[1];
+    this.scaleZ = Datas[id].obj_scale[2];
+    this.rotateX = Datas[id].obj_rotation[0];
+    this.rotateY = Datas[id].obj_rotation[1];
+    this.rotateZ = Datas[id].obj_rotation[2];
+    var orgColor = [Datas[id].obj_color[0] * 255.0, Datas[id].obj_color[1] * 255.0, Datas[id].obj_color[2] * 255.0];
+    this.color = orgColor;
+    this.reflect = Datas[id].obj_reflective;
+    this.refract = Datas[id].obj_refractive;
+    this.IOR = Datas[id].obj_indexOfRefraction;
+    this.emittance = Datas[id].obj_emittance;
+    this.scatter = Datas[id].obj_subsurfaceScatter;
+};
+
+function GUIAddObj(name, id) {
+    var i = guiObjs.length;
+    guiObjs.push( new GUIObj(id));
+
+    var folder = gui2.addFolder(name);
+
+    folder.add(guiObjs[i], 'translateX').min(-5).max(5).onChange(function () {
+        Datas[id].obj_pos[0] = guiObjs[i].translateX;
+        AddObjsAttr(id);
+        iterations = 0;
+    });
+    folder.add(guiObjs[i], 'translateY').min(-5).max(5).onChange(function () {
+        Datas[id].obj_pos[1] = guiObjs[i].translateY;
+        AddObjsAttr(id);
+        iterations = 0;
+    });
+    folder.add(guiObjs[i], 'translateZ').min(-5).max(5).onChange(function () {
+        Datas[id].obj_pos[2] = guiObjs[i].translateZ;
+        AddObjsAttr(id);
+        iterations = 0;
+    });
+    folder.add(guiObjs[i], 'scaleX').onChange(function () {
+        Datas[id].obj_scale[0] = guiObjs[i].scaleX;
+        AddObjsAttr(id);
+        iterations = 0;
+    });
+    folder.add(guiObjs[i], 'scaleY').onChange(function () {
+        Datas[id].obj_scale[1] = guiObjs[i].scaleY;
+        AddObjsAttr(id);
+        iterations = 0;
+    });
+    folder.add(guiObjs[i], 'scaleZ').onChange(function () {
+        Datas[id].obj_scale[2] = guiObjs[i].scaleZ;
+        AddObjsAttr(id);
+        iterations = 0;
+    });
+    folder.add(guiObjs[i], 'rotateX').onChange(function () {
+        Datas[id].obj_rotation[0] = guiObjs[i].rotateX;
+        AddObjsAttr(id);
+        iterations = 0;
+    });
+    folder.add(guiObjs[i], 'rotateY').onChange(function () {
+        Datas[id].obj_rotation[1] = guiObjs[i].rotateY;
+        AddObjsAttr(id);
+        iterations = 0;
+    });
+    folder.add(guiObjs[i], 'rotateZ').onChange(function () {
+        Datas[id].obj_rotation[2] = guiObjs[i].rotateZ;
+        AddObjsAttr(id);
+        iterations = 0;
+    });
+    folder.addColor(guiObjs[i], 'color').onChange(function () {
+        var newColor = [guiObjs[i].color[0] / 255.0, guiObjs[i].color[1] / 255.0, guiObjs[i].color[2] / 255.0];
+        Datas[id].obj_color = newColor;
+        AddObjsAttr(id);
+        iterations = 0;
+    });
+    folder.add(guiObjs[i], 'reflect').min(0).max(1).onChange(function () {
+        Datas[id].obj_reflective = guiObjs[i].reflect;
+        AddObjsAttr(id);
+        iterations = 0;
+    });
+    folder.add(guiObjs[i], 'refract').min(0).max(1).onChange(function () {
+        Datas[id].obj_refractive = guiObjs[i].refract;
+        AddObjsAttr(id);
+        iterations = 0;
+    });
+    folder.add(guiObjs[i], 'IOR').onChange(function () {
+        Datas[id].obj_indexOfRefraction = guiObjs[i].IOR;
+        AddObjsAttr(id);
+        iterations = 0;
+    });
+    folder.add(guiObjs[i], 'emittance').onChange(function () {
+        Datas[id].obj_emittance = guiObjs[i].emittance;
+        AddObjsAttr(id);
+        iterations = 0;
+    });
+    folder.add(guiObjs[i], 'scatter').onChange(function () {
+        Datas[id].obj_subsurfaceScatter = guiObjs[i].scatter;
+        AddObjsAttr(id);
+        iterations = 0;
+    });
+}
