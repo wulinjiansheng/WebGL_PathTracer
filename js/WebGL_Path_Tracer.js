@@ -601,9 +601,9 @@ function defaultScene() {
 	
 	iterations = 0;
 	
-	//var node = document.getElementById("gui-left").getElementByClassName("dg");
-	//if (node != null)
-	//	node.parentNode.removeChild(node);
+	var node = document.getElementById("gui2");
+	if (node != null)
+		node.parentNode.removeChild(node);
 	
 	GUIDefaultScene();
 }
@@ -772,6 +772,7 @@ function GUIConfig() {
 
 function GUIDefaultScene(){
 	gui2 = new dat.GUI({ autoPlace: false });
+	gui2.domElement.id = 'gui2';
     var container = document.getElementById('gui-left');
     container.appendChild(gui2.domElement);
 
