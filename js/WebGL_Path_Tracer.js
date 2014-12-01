@@ -759,11 +759,11 @@ function GUIObj(id) {
     this.rotateY = Datas[id].obj_rotation[1];
     this.rotateZ = Datas[id].obj_rotation[2];
     this.color = [Datas[id].obj_color[0] * 255.0, Datas[id].obj_color[1] * 255.0, Datas[id].obj_color[2] * 255.0];
-    this.reflect = Datas[id].obj_reflective;
-    this.refract = Datas[id].obj_refractive;
+    this.reflect = (Datas[id].obj_reflective == 1) ? true : false;
+    this.refract = (Datas[id].obj_refractive == 1) ? true : false;
     this.IOR = Datas[id].obj_indexOfRefraction;
     this.emittance = Datas[id].obj_emittance;
-    this.scatter = Datas[id].obj_subsurfaceScatter;
+    this.scatter = (Datas[id].obj_subsurfaceScatter == 1) ? true : false;
 };
 
 function GUIAddObj(name, id) {
@@ -822,12 +822,12 @@ function GUIAddObj(name, id) {
         AddObjsAttr(id);
         iterations = 0;
     });
-    folder.add(guiObjs[i], 'reflect').min(0).max(1).onChange(function () {
+    folder.add(guiObjs[i], 'reflect').onChange(function () {
         Datas[id].obj_reflective = guiObjs[i].reflect;
         AddObjsAttr(id);
         iterations = 0;
     });
-    folder.add(guiObjs[i], 'refract').min(0).max(1).onChange(function () {
+    folder.add(guiObjs[i], 'refract').onChange(function () {
         Datas[id].obj_refractive = guiObjs[i].refract;
         AddObjsAttr(id);
         iterations = 0;
