@@ -69,7 +69,7 @@ function runGL() {
 	initGL();
 	initBuffers();
 	initializeShader();
-
+	initGUI();
 	initDfaultScene();
 	animate();
 	
@@ -79,7 +79,7 @@ function runGL() {
 	document.onmouseup = handleMouseUp;
 	document.onmousemove = handleMouseMove;
 	
-	initGUI();
+	
 	
 }
 
@@ -600,6 +600,12 @@ function defaultScene() {
 	}
 	
 	iterations = 0;
+	
+	//var node = document.getElementById("gui-left").getElementByClassName("dg");
+	//if (node != null)
+	//	node.parentNode.removeChild(node);
+	
+	GUIDefaultScene();
 }
 
 function resize() {
@@ -757,8 +763,15 @@ function initGUI() {
      gui1.add(guiConfig, 'height').onChange(function () {
         height = guiConfig.height;
     });
+}
 
-    gui2 = new dat.GUI({ autoPlace: false });
+function GUIConfig() {
+    this.width = canvas.width;
+    this.height = canvas.height;
+}
+
+function GUIDefaultScene(){
+	gui2 = new dat.GUI({ autoPlace: false });
     var container = document.getElementById('gui-left');
     container.appendChild(gui2.domElement);
 
@@ -766,11 +779,6 @@ function initGUI() {
     GUIAddObj("Sphere 1", 12);
     GUIAddObj("Sphere 2", 13);
     GUIAddObj("Sphere 3", 14);
-}
-
-function GUIConfig() {
-    this.width = canvas.width;
-    this.height = canvas.height;
 }
 
 function GUIObj(id) {
@@ -857,7 +865,7 @@ function GUIAddObj(name, id) {
         AddObjsAttr(id);
         iterations = 0;
     });
-    folder.add(guiObjs[i], 'IOR').onChange(function () {
+    folder.add(guiObjs[i], 'IOR').min(1).onChange(function () {
         Datas[id].obj_indexOfRefraction = guiObjs[i].IOR;
         AddObjsAttr(id);
         iterations = 0;

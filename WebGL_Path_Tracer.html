@@ -496,7 +496,7 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
         temp.refractive = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).g);
         temp.reflectivity = texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).b;
 
-        temp.indexOfRefraction = 1.0 + 3.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).r;
+        temp.indexOfRefraction = max(3.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).r, 1.0);
         temp.subsurfaceScatter = int(texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).g);
         temp.emittance = int(25.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).b);
 
