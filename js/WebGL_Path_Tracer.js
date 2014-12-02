@@ -793,19 +793,11 @@ function GUIObj(id) {
     this.rotateY = Datas[id].obj_rotation[1];
     this.rotateZ = Datas[id].obj_rotation[2];
     this.color = [Datas[id].obj_color[0] * 255.0, Datas[id].obj_color[1] * 255.0, Datas[id].obj_color[2] * 255.0];
-<<<<<<< HEAD
-    this.reflect = (Datas[id].obj_reflective == 1) ? true : false;
-    this.refract = (Datas[id].obj_refractive == 1) ? true : false;
-    this.IOR = Datas[id].obj_indexOfRefraction;
-    this.emittance = Datas[id].obj_emittance;
-    this.scatter = (Datas[id].obj_subsurfaceScatter == 1) ? true : false;
-=======
     this.reflect = (Datas[id].obj_reflective == 1) ? true : false ;
     this.refract = (Datas[id].obj_refractive == 1) ? true : false ;
     this.IOR = Datas[id].obj_indexOfRefraction;
     this.emittance = Datas[id].obj_emittance;
     this.scatter = (Datas[id].obj_subsurfaceScatter == 1) ? true : false ;
->>>>>>> bd7e1e3173aabe75f0c4bcd8789878180e08ae4e
 };
 
 function GUIAddObj(name, id) {

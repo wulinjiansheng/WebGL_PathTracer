@@ -51,7 +51,7 @@
             return undefined;
         }
         var options = { alpha: false };        
-        var context = canvas.getContext("experimental-webgl", options);
+        var context = canvas.getContext("webgl") || canvas.getContext("experimental-webgl", options);
     
         if (!context && message) {
             message.innerText = "The browser supports WebGL, but initialization failed.";
