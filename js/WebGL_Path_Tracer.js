@@ -415,22 +415,6 @@ function initDfaultScene() {
     });
 
     DefaultDatas.push({
-        obj_pos: [WallTrans, 0.0, 0.0],
-        obj_scale: [0.1, WallScale, WallScale],
-        obj_rotation: [0.0, 0.0, 0.0],
-        obj_color: [0.25, 0.25, 0.75],
-        obj_type: 2,
-        obj_textureType: 0,
-        obj_reflective: 0,
-        obj_refractive: 0,
-        obj_reflectivity: 1.0,
-        obj_indexOfRefraction: 1.0,
-        obj_emittance: 0,
-        obj_subsurfaceScatter: 0
-    });
-
-
-    DefaultDatas.push({
         obj_pos: [0.0, WallTrans, 0.0],
         obj_scale: [WallScale, 0.1, WallScale],
         obj_rotation: [0.0, 0.0, 0.0],
@@ -777,9 +761,9 @@ function GUIDefaultScene(){
     container.appendChild(gui2.domElement);
 
     GUIAddObj("Light", 0);
-    GUIAddObj("Sphere 1", 12);
-    GUIAddObj("Sphere 2", 13);
-    GUIAddObj("Sphere 3", 14);
+    GUIAddObj("Sphere 1", 11);
+    GUIAddObj("Sphere 2", 12);
+    GUIAddObj("Sphere 3", 13);
 }
 
 function GUIObj(id) {
