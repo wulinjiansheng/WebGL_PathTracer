@@ -131,10 +131,6 @@ function initBuffers() {
 	gl.bindTexture(gl.TEXTURE_2D, objattrtex);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-//	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-//	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT); //gl.CLAMP_TO_EDGE);
-//	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-//	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST); // ;
 
 }
 
@@ -371,83 +367,83 @@ function initDfaultScene() {
     var WallScale = 10.0;
     var WallTrans = 5.0; 
 	
-	DefaultDatas.push({
-        obj_pos: [0.0, 0.0, -WallTrans],
-        obj_scale: [WallScale, 1.0, WallScale],
-        obj_rotation: [90.0, 0.0, 0.0],
-        obj_color: [1.0, 1.0, 1.0],
-        obj_type: 3,
-        obj_textureType: 0,
-        obj_reflective: 0,
-        obj_refractive: 0,
-        obj_reflectivity: 1.0,
-        obj_indexOfRefraction: 1.0,
-        obj_emittance: 0,
-        obj_subsurfaceScatter: 0
-    });
+//	DefaultDatas.push({
+//        obj_pos: [0.0, 0.0, -WallTrans],
+//        obj_scale: [WallScale, 1.0, WallScale],
+//        obj_rotation: [90.0, 0.0, 0.0],
+//        obj_color: [1.0, 1.0, 1.0],
+//        obj_type: 3,
+//        obj_textureType: 0,
+//        obj_reflective: 0,
+//        obj_refractive: 0,
+//        obj_reflectivity: 1.0,
+//        obj_indexOfRefraction: 1.0,
+//        obj_emittance: 0,
+//        obj_subsurfaceScatter: 0
+//    });
 
-    DefaultDatas.push({
-        obj_pos: [-WallTrans, 0.0, 0.0],
-        obj_scale: [ WallScale,1.0, WallScale],
-        obj_rotation: [0.0, 0.0, 270.0],
-        obj_color: [0.75, 0.25, 0.25],
-        obj_type: 3,
-        obj_textureType: 0,
-        obj_reflective: 0,
-        obj_refractive: 0,
-        obj_reflectivity: 1.0,
-        obj_indexOfRefraction: 1.0,
-        obj_emittance: 0,
-        obj_subsurfaceScatter: 0
-    });
+//    DefaultDatas.push({
+//        obj_pos: [-WallTrans, 0.0, 0.0],
+//        obj_scale: [ WallScale,1.0, WallScale],
+//        obj_rotation: [0.0, 0.0, 270.0],
+//        obj_color: [0.75, 0.25, 0.25],
+//        obj_type: 3,
+//        obj_textureType: 0,
+//        obj_reflective: 0,
+//        obj_refractive: 0,
+//        obj_reflectivity: 1.0,
+//        obj_indexOfRefraction: 1.0,
+//        obj_emittance: 0,
+//        obj_subsurfaceScatter: 0
+//    });
 
-    DefaultDatas.push({
-        obj_pos: [WallTrans, 0.0, 0.0],
-        obj_scale: [WallScale,1.0, WallScale],
-        obj_rotation: [0.0, 0.0, 90.0],
-        obj_color: [0.25, 0.25, 0.75],
-        obj_type: 3,
-        obj_textureType: 0,
-        obj_reflective: 0,
-        obj_refractive: 0,
-        obj_reflectivity: 1.0,
-        obj_indexOfRefraction: 1.0,
-        obj_emittance: 0,
-        obj_subsurfaceScatter: 0
-    });
-	
-	DefaultDatas.push({
-        obj_pos: [0.0, WallTrans, 0.0],
-        obj_scale: [WallScale, 1.0, WallScale],
-        obj_rotation: [180.0, 0.0, 0.0],
-        obj_color: [0.75, 0.75, 0.75],
-        obj_type: 3,
-        obj_textureType: 0,
-        obj_reflective: 0,
-        obj_refractive: 0,
-        obj_reflectivity: 1.0,
-        obj_indexOfRefraction: 1.0,
-        obj_emittance: 0,
-        obj_subsurfaceScatter: 0
-    });
-	
-	DefaultDatas.push({
-        obj_pos: [0.0, -WallTrans, 0.0],
-        obj_scale: [WallScale, 1.0, WallScale],
-        obj_rotation: [0.0, 0.0, 0.0],
-        obj_color: [0.75, 0.75, 0.75],
-        obj_type: 3,
-        obj_textureType: 0,
-        obj_reflective: 0,
-        obj_refractive: 0,
-        obj_reflectivity: 1.0,
-        obj_indexOfRefraction: 1.0,
-        obj_emittance: 0,
-        obj_subsurfaceScatter: 0
-    });
+//    DefaultDatas.push({
+//        obj_pos: [WallTrans, 0.0, 0.0],
+//        obj_scale: [WallScale,1.0, WallScale],
+//        obj_rotation: [0.0, 0.0, 90.0],
+//        obj_color: [0.25, 0.25, 0.75],
+//        obj_type: 3,
+//        obj_textureType: 0,
+//        obj_reflective: 0,
+//        obj_refractive: 0,
+//        obj_reflectivity: 1.0,
+//        obj_indexOfRefraction: 1.0,
+//        obj_emittance: 0,
+//        obj_subsurfaceScatter: 0
+//    });
+//	
+//	DefaultDatas.push({
+//        obj_pos: [0.0, WallTrans, 0.0],
+//        obj_scale: [WallScale, 1.0, WallScale],
+//        obj_rotation: [180.0, 0.0, 0.0],
+//        obj_color: [0.75, 0.75, 0.75],
+//        obj_type: 3,
+//        obj_textureType: 0,
+//        obj_reflective: 0,
+//        obj_refractive: 0,
+//        obj_reflectivity: 1.0,
+//        obj_indexOfRefraction: 1.0,
+//        obj_emittance: 0,
+//        obj_subsurfaceScatter: 0
+//    });
+//	
+//	DefaultDatas.push({
+//        obj_pos: [0.0, -WallTrans, 0.0],
+//        obj_scale: [WallScale, 1.0, WallScale],
+//        obj_rotation: [0.0, 0.0, 0.0],
+//        obj_color: [0.75, 0.75, 0.75],
+//        obj_type: 3,
+//        obj_textureType: 0,
+//        obj_reflective: 0,
+//        obj_refractive: 0,
+//        obj_reflectivity: 1.0,
+//        obj_indexOfRefraction: 1.0,
+//        obj_emittance: 0,
+//        obj_subsurfaceScatter: 0
+//    });
 
 	//cube wall
-/*	
+
     DefaultDatas.push({
         obj_pos: [0.0, 0.0, -WallTrans],
         obj_scale: [WallScale, WallScale, 0.1],
@@ -522,85 +518,85 @@ function initDfaultScene() {
         obj_emittance: 0,
         obj_subsurfaceScatter: 0
     });
-*/
 
-	////Box
-	// DefaultDatas.push({
-		// obj_pos: [0.0, -1.5, 0.0],
-		// obj_scale: [6.8, 0.2, 4.8],
-		// obj_rotation: [0.0, 0.0, 0.0],
-		// obj_color: [0.8, 0.8, 0.8],
-		// obj_type: 2,
-		// obj_textureType: 0,
-		// obj_reflective: 0,
-		// obj_refractive: 0,
-		// obj_reflectivity: 1.0,
-		// obj_indexOfRefraction: 1.0,
-		// obj_emittance: 0,
-		// obj_subsurfaceScatter: 0
-    // });
 
-////Cylinder
-    // var legpos1 = 3.0,legpos2 = 1.8;
-    // DefaultDatas.push({
-        // obj_pos: [legpos1, -3.5, legpos2],
-        // obj_scale: [0.3, 4.0, 0.3],
-        // obj_rotation: [0.0, 0.0, 0.0],
-        // obj_color: [0.9, 0.4, 0.0],
-        // obj_type: 1,
-        // obj_textureType: 0,
-        // obj_reflective: 0,
-        // obj_refractive: 0,
-        // obj_reflectivity: 1.0,
-        // obj_indexOfRefraction: 1.0,
-        // obj_emittance: 0,
-        // obj_subsurfaceScatter: 0
-    // });
+	//Box
+	 DefaultDatas.push({
+		 obj_pos: [0.0, -1.5, 0.0],
+		 obj_scale: [6.8, 0.2, 4.8],
+		 obj_rotation: [0.0, 0.0, 0.0],
+		 obj_color: [0.8, 0.8, 0.8],
+		 obj_type: 2,
+		 obj_textureType: 0,
+		 obj_reflective: 0,
+		 obj_refractive: 0,
+		 obj_reflectivity: 1.0,
+		 obj_indexOfRefraction: 1.0,
+		 obj_emittance: 0,
+		 obj_subsurfaceScatter: 0
+     });
 
-    // DefaultDatas.push({
-        // obj_pos: [-legpos1, -3.5, legpos2],
-        // obj_scale: [0.3, 4.0, 0.3],
-        // obj_rotation: [0.0, 0.0, 0.0],
-        // obj_color: [0.9, 0.4, 0.0],
-        // obj_type: 1,
-        // obj_textureType: 0,
-        // obj_reflective: 0,
-        // obj_refractive: 0,
-        // obj_reflectivity: 1.0,
-        // obj_indexOfRefraction: 1.0,
-        // obj_emittance: 0,
-        // obj_subsurfaceScatter: 0
-    // });
+//Cylinder
+     var legpos1 = 3.0,legpos2 = 1.8;
+     DefaultDatas.push({
+         obj_pos: [legpos1, -3.5, legpos2],
+         obj_scale: [0.3, 4.0, 0.3],
+         obj_rotation: [0.0, 0.0, 0.0],
+         obj_color: [0.9, 0.4, 0.0],
+         obj_type: 1,
+         obj_textureType: 0,
+         obj_reflective: 0,
+         obj_refractive: 0,
+         obj_reflectivity: 1.0,
+         obj_indexOfRefraction: 1.0,
+         obj_emittance: 0,
+         obj_subsurfaceScatter: 0
+     });
 
-    // DefaultDatas.push({
-        // obj_pos: [legpos1, -3.5, -legpos2],
-        // obj_scale: [0.3, 4.0, 0.3],
-        // obj_rotation: [0.0, 0.0, 0.0],
-        // obj_color: [0.9, 0.4, 0.0],
-        // obj_type: 1,
-        // obj_textureType: 0,
-        // obj_reflective: 0,
-        // obj_refractive: 0,
-        // obj_reflectivity: 1.0,
-        // obj_indexOfRefraction: 1.0,
-        // obj_emittance: 0,
-        // obj_subsurfaceScatter: 0
-    // });
+     DefaultDatas.push({
+         obj_pos: [-legpos1, -3.5, legpos2],
+         obj_scale: [0.3, 4.0, 0.3],
+         obj_rotation: [0.0, 0.0, 0.0],
+         obj_color: [0.9, 0.4, 0.0],
+         obj_type: 1,
+         obj_textureType: 0,
+         obj_reflective: 0,
+         obj_refractive: 0,
+         obj_reflectivity: 1.0,
+         obj_indexOfRefraction: 1.0,
+         obj_emittance: 0,
+         obj_subsurfaceScatter: 0
+     });
 
-    // DefaultDatas.push({
-        // obj_pos: [-legpos1, -3.5, -legpos2],
-        // obj_scale: [0.3, 4.0, 0.3],
-        // obj_rotation: [0.0, 0.0, 0.0],
-        // obj_color: [0.9, 0.4, 0.0],
-        // obj_type: 1,
-        // obj_textureType: 0,
-        // obj_reflective: 0,
-        // obj_refractive: 0,
-        // obj_reflectivity: 1.0,
-        // obj_indexOfRefraction: 1.0,
-        // obj_emittance: 0,
-        // obj_subsurfaceScatter: 0
-    // });
+     DefaultDatas.push({
+         obj_pos: [legpos1, -3.5, -legpos2],
+         obj_scale: [0.3, 4.0, 0.3],
+         obj_rotation: [0.0, 0.0, 0.0],
+         obj_color: [0.9, 0.4, 0.0],
+         obj_type: 1,
+         obj_textureType: 0,
+         obj_reflective: 0,
+         obj_refractive: 0,
+         obj_reflectivity: 1.0,
+         obj_indexOfRefraction: 1.0,
+         obj_emittance: 0,
+         obj_subsurfaceScatter: 0
+     });
+
+     DefaultDatas.push({
+         obj_pos: [-legpos1, -3.5, -legpos2],
+         obj_scale: [0.3, 4.0, 0.3],
+         obj_rotation: [0.0, 0.0, 0.0],
+         obj_color: [0.9, 0.4, 0.0],
+         obj_type: 1,
+         obj_textureType: 0,
+         obj_reflective: 0,
+         obj_refractive: 0,
+         obj_reflectivity: 1.0,
+         obj_indexOfRefraction: 1.0,
+         obj_emittance: 0,
+         obj_subsurfaceScatter: 0
+     });
 
     //Sphere1
     DefaultDatas.push({
