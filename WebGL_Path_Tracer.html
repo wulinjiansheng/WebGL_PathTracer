@@ -117,37 +117,32 @@ void rotateX (inout mat4 origin, in float angle) {
     dest[2][0] = a10 * -s + a20 * c; dest[2][1] = a11 * -s + a21 * c;
     dest[2][2] = a12 * -s + a22 * c; dest[2][3] = a13 * -s + a23 * c;
 
-//       mat4 scale = mat4(1.0,0.0,0.0,0.0,
-//                     0.0,cos(angle),-sin(angle),0.0,
-//                     0.0,sin(angle),cos(angle),0.0,
-//                     0.0,0.0,0.0,1.0);
-//   origin = origin * scale;
     origin = dest;
     return;
 }
 
 
-void rotateY  (inout mat4 mat, in float angle) {
-    mat4 dest = mat;
+void rotateY  (inout mat4 origin, in float angle) {
+    mat4 dest = origin;
     float s = sin(angle),c = cos(angle),
-        a00 = mat[0][0],a01 = mat[0][1],a02 = mat[0][2],a03 = mat[0][3],
-        a20 = mat[2][0],a21 = mat[2][1],a22 = mat[2][2],a23 = mat[2][3];
+        a00 = origin[0][0],a01 = origin[0][1],a02 = origin[0][2],a03 = origin[0][3],
+        a20 = origin[2][0],a21 = origin[2][1],a22 = origin[2][2],a23 = origin[2][3];
 
     dest[0][0] = a00 * c + a20 * -s; dest[0][1] = a01 * c + a21 * -s;
     dest[0][2] = a02 * c + a22 * -s; dest[0][3] = a03 * c + a23 * -s;
     dest[2][0] = a00 * s + a20 * c; dest[2][1] = a01 * s + a21 * c;
     dest[2][2] = a02 * s + a22 * c; dest[2][3] = a03 * s + a23 * c;
 
-    mat = dest;
+    origin = dest;
     return;
 }
 
 
-void rotateZ (inout mat4 mat, in float angle) {
-    mat4 dest = mat;
+void rotateZ (inout mat4 origin, in float angle) {
+    mat4 dest = origin;
     float s = sin(angle),c = cos(angle),
-        a00 = mat[0][0], a01 = mat[0][1], a02 = mat[0][2], a03 = mat[0][3],
-        a10 = mat[1][0], a11 = mat[1][1], a12 = mat[1][2], a13 = mat[1][3];
+        a00 = origin[0][0], a01 = origin[0][1], a02 = origin[0][2], a03 = origin[0][3],
+        a10 = origin[1][0], a11 = origin[1][1], a12 = origin[1][2], a13 = origin[1][3];
 
     dest[0][0] = a00 * c + a10 * s; dest[0][1] = a01 * c + a11 * s;
     dest[0][2] = a02 * c + a12 * s; dest[0][3] = a03 * c + a13 * s;
@@ -155,7 +150,7 @@ void rotateZ (inout mat4 mat, in float angle) {
     dest[1][0] = a00 * -s + a10 * c; dest[1][1] = a01 * -s + a11 * c;
     dest[1][2] = a02 * -s + a12 * c; dest[1][3] = a03 * -s + a13 * c;
 
-    mat = dest;
+    origin = dest;
     return;
 }
 
@@ -538,8 +533,8 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
         vec3 rotv =  texture2D(attrtexture, vec2((7.0 * fix + 5.0)/attw,fiy/atth)).rgb;
         rotateX(modelview,360.0 * PI / 180.0 * rotv.x);
         rotateY(modelview,360.0 * PI / 180.0 * rotv.y);
-       rotateZ(modelview,360.0 * PI / 180.0 * rotv.z);
-       scale(modelview,10.0 * texture2D(attrtexture, vec2((7.0 * fix + 6.0)/attw,fiy/atth)).rgb);
+        rotateZ(modelview,360.0 * PI / 180.0 * rotv.z);
+        scale(modelview,10.0 * texture2D(attrtexture, vec2((7.0 * fix + 6.0)/attw,fiy/atth)).rgb);
         temp.model = modelview;
         temp.invmodel = inversemat(modelview);
         temp.transinvmodel = transposemat(temp.invmodel);
@@ -548,16 +543,16 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
 		if(temp.type == 0){
 			hitPointDistance = intersectSphere(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
 		}
-        if(temp.type == 1)
+        else if(temp.type == 1)
         {
 		    hitPointDistance = intersectCube(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
         }
-        if(temp.type == 2)
+        else if(temp.type == 2)
         {
 		    hitPointDistance = intersectCube(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
         }
-//        if (temp.type == 3)
-//            hitPointDistance = intersectPlane(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
+        //if (temp.type == 3)
+           // hitPointDistance = intersectPlane(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
 
 
 		if(hitPointDistance > 0.0){
