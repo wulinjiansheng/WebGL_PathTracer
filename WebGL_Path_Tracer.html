@@ -468,51 +468,35 @@ float intersectCylinder(GEOM g, vec3 rStart, vec3 rDir, out float t, out vec3 no
 	return -1.0;
 
 }
-
+/*
 float intersectPlane(GEOM g, vec3 rStart, vec3 rDir, out float t,  out vec3 normal, out vec3 pos) {	//on xz plane, normal: +y
-	vec3 normal = (0.0, 1.0, 0.0);
+	normal = vec3(0.0, 1.0, 0.0);
 	
     vec3 ro = (g.invmodel * vec4(rStart,1.0)).xyz;
     vec3 rd = (normalize(g.invmodel * vec4(rDir,0.0))).xyz;
 
     float sign=1.0;
-	if(dot(rd, normal) > 0.0)
+	if(dot(rd, normal) >= 0.0 || rd.y == 0.0)
 		return -1.0;
-	
-	
+		
 	RAY rt; 
 	rt.origin = ro; 
 	rt.dir = rd;
 
-	float vDotDirection = dot(rt.origin, rt.dir);
-	float radicand = vDotDirection * vDotDirection - (dot(rt.origin, rt.origin) - radius * radius);
-	if (radicand < 0.0){
-		return -1.0;
-	}
-
-	float squareRoot = sqrt(radicand);
-	float firstTerm = -vDotDirection;
-	float t1 = firstTerm + squareRoot;
-	float t2 = firstTerm - squareRoot;
-
-	if (t1 < 0.0 && t2 < 0.0) {
-		return -1.0;
-	} else if (t1 > 0.0 && t2 > 0.0) {
-		t = min(t1, t2);
-	} else {
-		t = max(t1, t2);
-	}
+    t = -ro.y / rd.y;
 
 	vec3 realIntersectionPoint = (g.model *  vec4(getPointOnRay(rt, t), 1.0)).xyz;
-	vec3 realOrigin = (g.model * vec4(0,0,0,1)).xyz;
+    pos = realIntersectionPoint;
 
-	pos = realIntersectionPoint;
-	normal = sign*normalize((realIntersectionPoint - realOrigin));
+    if (realIntersectionPoint.x < -0.5 || realIntersectionPoint.x > 0.5 ||
+        realIntersectionPoint.z < -0.5 || realIntersectionPoint.z > 0.5)
+        return -1.0;
+
+	normal = normalize((g.transinvmodel * vec4(normal,0.0)).xyz);
 
 	return length(rStart - realIntersectionPoint);
-    
 }
-
+*/
 bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
     float attw = attrtexsize.r;
     float atth = attrtexsize.g;
@@ -559,14 +543,16 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
 		if(temp.type == 0){
 			hitPointDistance = intersectSphere(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
 		}
-        else if(temp.type == 1)
+        if(temp.type == 1)
         {
 		    hitPointDistance = intersectCylinder(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
         }
-        else if(temp.type == 2)
+        if(temp.type == 2)
         {
 		    hitPointDistance = intersectCube(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
         }
+        //if (temp.type == 3)
+          //  hitPointDistance = intersectPlane(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
 
 
 		if(hitPointDistance > 0.0){
