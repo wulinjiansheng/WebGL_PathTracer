@@ -180,11 +180,6 @@ function animate() {
 	
 	message.innerHTML = "Iterations: " + (iterations).toString();
 
-	
-	///////////////////////////////////////////////////////////////////////////
-	// Update
-
-
 	///////////////////////////////////////////////////////////////////////////
 	// Render
 	gl.useProgram(shaderProgram);
@@ -372,7 +367,7 @@ function initDfaultScene() {
         obj_scale: [WallScale, 1.0, WallScale],
         obj_rotation: [91.0, 0.0, 0.0],
         obj_color: [1.0, 1.0, 1.0],
-        obj_type: 3,
+        obj_type: 1,
         obj_textureType: 0,
         obj_reflective: 0,
         obj_refractive: 0,
@@ -387,7 +382,7 @@ function initDfaultScene() {
         obj_scale: [ WallScale,1.0, WallScale],
         obj_rotation: [0.0, 0.0, 271.0],
         obj_color: [0.75, 0.25, 0.25],
-        obj_type: 3,
+        obj_type: 1,
         obj_textureType: 0,
         obj_reflective: 0,
         obj_refractive: 0,
@@ -402,7 +397,7 @@ function initDfaultScene() {
         obj_scale: [WallScale,1.0, WallScale],
         obj_rotation: [0.0, 0.0, 91.0],
         obj_color: [0.25, 0.25, 0.75],
-        obj_type: 3,
+        obj_type: 1,
         obj_textureType: 0,
         obj_reflective: 0,
         obj_refractive: 0,
@@ -417,7 +412,7 @@ function initDfaultScene() {
         obj_scale: [WallScale, 1.0, WallScale],
         obj_rotation: [180.0, 0.0, 0.0],
         obj_color: [0.75, 0.75, 0.75],
-        obj_type: 3,
+        obj_type: 1,
         obj_textureType: 0,
         obj_reflective: 0,
         obj_refractive: 0,
@@ -432,7 +427,7 @@ function initDfaultScene() {
         obj_scale: [WallScale, 1.0, WallScale],
         obj_rotation: [0.0, 0.0, 0.0],
         obj_color: [0.75, 0.75, 0.75],
-        obj_type: 3,
+        obj_type: 1,
         obj_textureType: 0,
         obj_reflective: 0,
         obj_refractive: 0,
@@ -508,14 +503,14 @@ function initDfaultScene() {
 		 obj_subsurfaceScatter: 0
      });
 
-    //Cylinder
+    //Legs
     var legpos1 = 3.0, legpos2 = 1.8;
     DefaultDatas.push({
         obj_pos: [legpos1, -3.5, legpos2],
         obj_scale: [0.3, 4.0, 0.3],
         obj_rotation: [0.0, 0.0, 0.0],
         obj_color: [0.9, 0.4, 0.0],
-        obj_type: 1,
+        obj_type: 2,
         obj_textureType: 0,
         obj_reflective: 0,
         obj_refractive: 0,
@@ -530,7 +525,7 @@ function initDfaultScene() {
         obj_scale: [0.3, 4.0, 0.3],
         obj_rotation: [0.0, 0.0, 0.0],
         obj_color: [0.9, 0.4, 0.0],
-        obj_type: 1,
+        obj_type: 2,
         obj_textureType: 0,
         obj_reflective: 0,
         obj_refractive: 0,
@@ -545,7 +540,7 @@ function initDfaultScene() {
         obj_scale: [0.3, 4.0, 0.3],
         obj_rotation: [0.0, 0.0, 0.0],
         obj_color: [0.9, 0.4, 0.0],
-        obj_type: 1,
+        obj_type: 2,
         obj_textureType: 0,
         obj_reflective: 0,
         obj_refractive: 0,
@@ -560,7 +555,7 @@ function initDfaultScene() {
         obj_scale: [0.3, 4.0, 0.3],
         obj_rotation: [0.0, 0.0, 0.0],
         obj_color: [0.9, 0.4, 0.0],
-        obj_type: 1,
+        obj_type: 2,
         obj_textureType: 0,
         obj_reflective: 0,
         obj_refractive: 0,

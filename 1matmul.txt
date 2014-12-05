@@ -1,3 +1,15 @@
+vec3 randomDirectionInSphere(float seed) {
+	float u = getrandom(vec3(12.9898, 78.233, 151.7182), seed);
+	float v = getrandom(vec3(63.7264, 10.873, 623.6736), seed);
+
+	float up = u * 2.0 - 1.0; // cos(theta)
+	float over = sqrt(1.0 - up * up); // sin(theta)
+	float around = v * 3.14;
+
+	return vec3( up, cos(around) * over, sin(around) * over );
+}
+
+
 mat4 multiply(in mat4 mat, in mat4 mato) {
     mat4 dest;
 
@@ -43,5 +55,73 @@ mat4 multiply(in mat4 mat, in mat4 mato) {
     dest[3][3] = b0*a03 + b1*a13 + b2*a23 + b3*a33;
 
     return dest;
+}
+
+
+
+vec3 getRandomPointOnSphere(in GEOM sphere, in float seed){
+
+	float radius = 0.5;
+
+	vec3 point;
+
+	float theta, phi;
+	theta = 180.0 * getrandom(vec3(12.9898, 78.233, 151.7182), seed); //0-180
+	phi = 360.0 * getrandom(vec3(78.233, 12.9898, 151.7182), seed+1.0); //0-360
+
+	float degToRad = PI / 180.0;
+
+	point.x = radius * sin(theta * degToRad) * cos(phi * degToRad);
+	point.y = radius * sin(theta * degToRad) * sin(phi * degToRad);
+	point.z = radius * cos(theta * degToRad);
+
+	vec3 randPoint = (sphere.model * vec4(point, 1.0)).xyz;
+
+	return randPoint;
+}
+
+vec3 getRandomPointOnCube(in GEOM cube, in float seed){
+
+    vec3 origin = (cube.model * vec4(0.0,0.0,0.0,1.0)).xyz;
+    vec3 xmax = (cube.model * vec4(0.5,0.0,0.0,1.0)).xyz;
+    vec3 ymax = (cube.model * vec4(0.0,0.5,0.0,1.0)).xyz;
+    vec3 zmax = (cube.model * vec4(0.0,0.0,0.5,1.0)).xyz;
+    float xradius = distance(origin, xmax);
+    float yradius = distance(origin, ymax);
+    float zradius = distance(origin, zmax);
+
+    //get surface areas of sides
+    vec3 radii = vec3(xradius,yradius,zradius);
+    float side1 = radii.x * radii.y * 4.0; //x-y face
+    float side2 = radii.z * radii.y * 4.0; //y-z face
+    float side3 = radii.x * radii.z * 4.0; //x-z face
+    float totalarea = 2.0 * (side1+side2+side3);
+    
+    //pick random face, weighted by surface area
+    float russianRoulette = getrandom(vec3(12.9898, 78.233, 151.7182), seed); //0-1
+    
+    float rand1 = getrandom(vec3(78.233, 12.9898, 151.7182), seed + 1.0) - 0.5; //-0.5-0.5
+    float rand2 = getrandom(vec3(151.7182, 12.9898, 78.233), seed + 2.0) - 0.5; //-0.5-0.5
+
+    vec3 point = vec3(0.5,0.5,0.5);
+    
+    if(russianRoulette<(side1/totalarea))
+       point = vec3(rand1, rand2, 0.5);
+    else if(russianRoulette<((side1*2.0)/totalarea))
+       point = vec3(rand1, rand2, -0.5);
+    else if(russianRoulette<(((side1*2.0)+(side2))/totalarea))
+       point = vec3(0.5, rand1, rand2);
+    else if(russianRoulette<(((side1*2.0)+(side2*2.0))/totalarea))
+       point = vec3(-0.5, rand1, rand2);
+    else if(russianRoulette<(((side1*2.0)+(side2*2.0)+(side3))/totalarea))
+       point = vec3( rand1, 0.5, rand2);
+    else
+       point = vec3( rand1, -0.5, rand2);
+
+    
+    vec3 randPoint = (cube.model * vec4(point,1.0)).xyz;
+
+    return randPoint;
+       
 }
 
