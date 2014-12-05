@@ -368,9 +368,9 @@ function initDfaultScene() {
     var WallTrans = 5.0;
 
     DefaultDatas.push({
-        obj_pos: [0.0, 0.0, -WallTrans],
+        obj_pos: [0.0, 0.0, -WallTrans+0.1],
         obj_scale: [WallScale, 1.0, WallScale],
-        obj_rotation: [90.0, 0.0, 0.0],
+        obj_rotation: [91.0, 0.0, 0.0],
         obj_color: [1.0, 1.0, 1.0],
         obj_type: 3,
         obj_textureType: 0,
@@ -383,9 +383,9 @@ function initDfaultScene() {
     });
 
     DefaultDatas.push({
-        obj_pos: [-WallTrans, 0.0, 0.0],
+        obj_pos: [-WallTrans+0.1, 0.0, 0.0],
         obj_scale: [ WallScale,1.0, WallScale],
-        obj_rotation: [0.0, 0.0, 270.0],
+        obj_rotation: [0.0, 0.0, 271.0],
         obj_color: [0.75, 0.25, 0.25],
         obj_type: 3,
         obj_textureType: 0,
@@ -398,9 +398,9 @@ function initDfaultScene() {
     });
 
     DefaultDatas.push({
-        obj_pos: [WallTrans, 0.0, 0.0],
+        obj_pos: [WallTrans-0.1, 0.0, 0.0],
         obj_scale: [WallScale,1.0, WallScale],
-        obj_rotation: [0.0, 0.0, 90.0],
+        obj_rotation: [0.0, 0.0, 91.0],
         obj_color: [0.25, 0.25, 0.75],
         obj_type: 3,
         obj_textureType: 0,
