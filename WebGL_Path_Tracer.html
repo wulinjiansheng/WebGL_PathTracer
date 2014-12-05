@@ -50,7 +50,6 @@ uniform vec3 vcameraPos;
 uniform mat4 u_vInvMP;
 
 varying vec3 InitRay;
-
 void main(void)
 {
     gl_Position = vec4(aVertex, 0.0, 1.0);
@@ -199,10 +198,7 @@ mat4 transposemat(in mat4 mat)
 struct RAY{
 	vec3 origin;
 	vec3 dir;
-    vec3 raycolor;
-//	bool isInside;
 	float IOR;
-	//bool continueFlag;//if the ray is alive
 };
 
 struct GEOM{
@@ -230,9 +226,6 @@ struct INTERSECT{
 	vec3 IntersectN;
 	GEOM IntersectG;
 };
-
-
-
 
 vec3 getPointOnRay(RAY r, float t){
   return r.origin + (t - 0.0001) * normalize(r.dir);
@@ -531,7 +524,7 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
 		if(temp.type == 0){
 			hitPointDistance = intersectSphere(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
 		}
-        else if(temp.type == 3)
+        else if(temp.type == 1)
         {
 		    hitPointDistance = intersectPlane(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
         }
@@ -632,72 +625,6 @@ Fresnel calculateFresnel(vec3 normal, vec3 incident, float incidentIOR, float tr
 }
 
 
-vec3 getRandomPointOnSphere(in GEOM sphere, in float seed){
-
-	float radius = 0.5;
-
-	vec3 point;
-
-	float theta, phi;
-	theta = 180.0 * getrandom(vec3(12.9898, 78.233, 151.7182), seed); //0-180
-	phi = 360.0 * getrandom(vec3(78.233, 12.9898, 151.7182), seed+1.0); //0-360
-
-	float degToRad = PI / 180.0;
-
-	point.x = radius * sin(theta * degToRad) * cos(phi * degToRad);
-	point.y = radius * sin(theta * degToRad) * sin(phi * degToRad);
-	point.z = radius * cos(theta * degToRad);
-
-	vec3 randPoint = (sphere.model * vec4(point, 1.0)).xyz;
-
-	return randPoint;
-}
-
-vec3 getRandomPointOnCube(in GEOM cube, in float seed){
-
-    vec3 origin = (cube.model * vec4(0.0,0.0,0.0,1.0)).xyz;
-    vec3 xmax = (cube.model * vec4(0.5,0.0,0.0,1.0)).xyz;
-    vec3 ymax = (cube.model * vec4(0.0,0.5,0.0,1.0)).xyz;
-    vec3 zmax = (cube.model * vec4(0.0,0.0,0.5,1.0)).xyz;
-    float xradius = distance(origin, xmax);
-    float yradius = distance(origin, ymax);
-    float zradius = distance(origin, zmax);
-
-    //get surface areas of sides
-    vec3 radii = vec3(xradius,yradius,zradius);
-    float side1 = radii.x * radii.y * 4.0; //x-y face
-    float side2 = radii.z * radii.y * 4.0; //y-z face
-    float side3 = radii.x * radii.z * 4.0; //x-z face
-    float totalarea = 2.0 * (side1+side2+side3);
-    
-    //pick random face, weighted by surface area
-    float russianRoulette = getrandom(vec3(12.9898, 78.233, 151.7182), seed); //0-1
-    
-    float rand1 = getrandom(vec3(78.233, 12.9898, 151.7182), seed + 1.0) - 0.5; //-0.5-0.5
-    float rand2 = getrandom(vec3(151.7182, 12.9898, 78.233), seed + 2.0) - 0.5; //-0.5-0.5
-
-    vec3 point = vec3(0.5,0.5,0.5);
-    
-    if(russianRoulette<(side1/totalarea))
-       point = vec3(rand1, rand2, 0.5);
-    else if(russianRoulette<((side1*2.0)/totalarea))
-       point = vec3(rand1, rand2, -0.5);
-    else if(russianRoulette<(((side1*2.0)+(side2))/totalarea))
-       point = vec3(0.5, rand1, rand2);
-    else if(russianRoulette<(((side1*2.0)+(side2*2.0))/totalarea))
-       point = vec3(-0.5, rand1, rand2);
-    else if(russianRoulette<(((side1*2.0)+(side2*2.0)+(side3))/totalarea))
-       point = vec3( rand1, 0.5, rand2);
-    else
-       point = vec3( rand1, -0.5, rand2);
-
-    
-    vec3 randPoint = (cube.model * vec4(point,1.0)).xyz;
-
-    return randPoint;
-       
-}
-
 ///*For Subsurface Scattering  https://machinesdontcare.wordpress.com/tag/subsurface/ */
 float halfLambert(in vec3 vect1, in vec3 vect2)
 {
@@ -714,35 +641,11 @@ float blinnPhongSpecular(in vec3 normalVec, in vec3 lightVec, in float specPower
 	
 vec3 subScatterFS(in INTERSECT intersect,in float seed)
 {	
-//    GEOM light; //light at index 0 
-//    float attw = attrtexsize.r;
-//    float atth = attrtexsize.g;
-
-//    float fix = 0.0;
-//    float fiy = 0.0;
-//    light.color = texture2D(attrtexture, vec2((7.0 * fix)/attw,0.0/atth)).rgb;
-
-//    light.type = int(5.0 * texture2D(attrtexture, vec2((7.0 * fix + 1.0)/attw,fiy/atth)).r);
-
-//    mat4 modelview = mat4(1.0);     
-//    translate(modelview,20.0 * (texture2D(attrtexture, vec2((7.0 * fix + 4.0)/attw,fiy/atth)).rgb-0.5));
-//    vec3 rotv =  texture2D(attrtexture, vec2((7.0 * fix + 5.0)/attw,fiy/atth)).rgb;
-//    rotateX(modelview,360.0 * PI / 180.0 * rotv.x);
-//    rotateY(modelview,360.0 * PI / 180.0 * rotv.y);
-//    rotateZ(modelview,360.0 * PI / 180.0 * rotv.z);
-//    scale(modelview,10.0 * texture2D(attrtexture, vec2((7.0 * fix + 6.0)/attw,fiy/atth)).rgb);
-//    light.model = modelview;
-//    light.invmodel = inversemat(modelview);
-//    light.transinvmodel = transposemat(light.invmodel);
-//      	
 	float RimScalar = 1.0;
-	float MaterialThickness = 0.3;
+	float MaterialThickness = 0.5;
 	vec3 ExtinctionCoefficient = vec3(1.0,1.0,1.0);
 	vec3 SpecColor = vec3(1.0,1.0,1.0);
     vec3 lightPoint = vec3(0.0,5.0,0.0);
-    //lightPoint = getRandomPointOnCube(light,seed);
-
-	vec3 p = intersect.IntersectP ;
 
 	float attenuation = 10.0 * (1.0 / distance(lightPoint,intersect.IntersectP));
 	vec3 eVec = normalize(intersect.IntersectP);
@@ -765,13 +668,15 @@ vec3 subScatterFS(in INTERSECT intersect,in float seed)
 		
 	vec4 finalCol = vec4(dotLN,1.0) + vec4(indirectLightComponent,1.0);
 	finalCol.rgb += (rim * RimScalar * attenuation * finalCol.a);
-    float SpecularPower = 15.0;
-	finalCol.rgb += vec3(blinnPhongSpecular(wNorm,lVec,SpecularPower) * attenuation * SpecColor * finalCol.a * 0.02);
-	finalCol.rgb *= vec3(1.0);//light.color
+    float SpecularPower = 5.0;
+	finalCol.rgb += vec3(blinnPhongSpecular(wNorm,lVec,SpecularPower) * attenuation * SpecColor * finalCol.a * 0.1);
+	finalCol.rgb *= vec3(1.0);
+    finalCol.r = clamp(finalCol.r,0.0,1.0);
+    finalCol.g = clamp(finalCol.g,0.0,1.0);
+    finalCol.b = clamp(finalCol.b,0.0,1.0);
 
 	return finalCol.rgb;   
 }
-
 
 const int depth = 5;
 vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
@@ -798,7 +703,7 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
             else if(intersect.IntersectG.refractive == 0 && intersect.IntersectG.reflective == 0 && intersect.IntersectG.subsurfaceScatter == 0)
             {//Non light object					      									
 				colorMask *= intersect.IntersectG.color;
-				col+= colorMask;																								
+				col = colorMask;																								
 				
 				float random = rand(intersect.IntersectP.xy);
 				r.dir = normalize(calculateRandomDirectionInHemisphere(seed + random, intersect.IntersectN));	
@@ -808,11 +713,11 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
             {  
                 bool isInsideOut = dot(r.dir,intersect.IntersectN) > 0.0; //out:> 0.0 true,in :<=0.0  false     
             	if(!isInsideOut && intersect.IntersectG.subsurfaceScatter > 0)
-                {
-                    float random = rand(intersect.IntersectP.xy);
+                {            
+                    float random = rand(intersect.IntersectP.xy);         
 				    colorMask *= subScatterFS(intersect,random);
                 }
-
+                
                 if(intersect.IntersectG.refractive > 0)   //refractive object must have reflective
                 {
                     vec3 random = vec3(rand(intersect.IntersectP.xy),rand(intersect.IntersectP.xz),rand(intersect.IntersectP.yz)) ;
@@ -848,20 +753,17 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
                         r.IOR = 1.0;
 
                     colorMask *= intersect.IntersectG.color;
-                    col+= colorMask;
+                    col = colorMask;
                 }
                 else if(intersect.IntersectG.reflective > 0)
                 {
                     colorMask *= intersect.IntersectG.color;
-                    col+= colorMask;
+                    col = colorMask;
                     r.IOR = 1.0;               
                     r.dir = reflect(r.dir,intersect.IntersectN);
                     r.origin = intersect.IntersectP + shift * r.dir;
                 }
             }
-
-
-
 		}
         else{
 			col = vec3(0.0,0.0,0.0);
@@ -878,6 +780,8 @@ void main(void)
 	RAY r;
 	r.origin = cameraPos.xyz;
 	r.dir = normalize(InitRay);
+
+
     if(SSAA>0)
     {
         float u = 0.001 * sin( getrandom(vec3(12.9898, 78.233, 151.7182), time) );
@@ -886,14 +790,13 @@ void main(void)
     }
 
 	r.IOR = 1.0;		
-    r.raycolor = vec3(1.0,1.0,1.0);
 
 	vec3 finalCol = vec3(0.0); 
 	pathTrace(r, 1, finalCol);
 
 	vec3 texCol = texture2D(texture, vec2(gl_FragCoord.x / texsize.r,gl_FragCoord.y / texsize.g) ).rgb;
 	gl_FragColor = vec4(mix( finalCol/5.0, texCol,u_iterations / (1.0+u_iterations)), 1.0);
-	//gl_FragColor = vec4(texCol+vec3(0.01, 0.01, 0.01), 1.0);
+
 }
 
     </script>
