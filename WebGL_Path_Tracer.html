@@ -668,12 +668,9 @@ vec3 subScatterFS(in INTERSECT intersect,in float seed)
 		
 	vec4 finalCol = vec4(dotLN,1.0) + vec4(indirectLightComponent,1.0);
 	finalCol.rgb += (rim * RimScalar * attenuation * finalCol.a);
-    float SpecularPower = 5.0;
+    float SpecularPower = 15.0;
 	finalCol.rgb += vec3(blinnPhongSpecular(wNorm,lVec,SpecularPower) * attenuation * SpecColor * finalCol.a * 0.1);
 	finalCol.rgb *= vec3(1.0);
-    finalCol.r = clamp(finalCol.r,0.0,1.0);
-    finalCol.g = clamp(finalCol.g,0.0,1.0);
-    finalCol.b = clamp(finalCol.b,0.0,1.0);
 
 	return finalCol.rgb;   
 }
@@ -700,7 +697,7 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
 				col = colorMask;	
 			    return col;   
 			}
-            else if(intersect.IntersectG.refractive == 0 && intersect.IntersectG.reflective == 0 && intersect.IntersectG.subsurfaceScatter == 0)
+            else if(intersect.IntersectG.refractive == 0 && intersect.IntersectG.reflective == 0)
             {//Non light object					      									
 				colorMask *= intersect.IntersectG.color;
 				col = colorMask;																								
@@ -710,14 +707,8 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
                 r.origin = intersect.IntersectP + r.dir * shift;																			
 			}
             else
-            {  
-                bool isInsideOut = dot(r.dir,intersect.IntersectN) > 0.0; //out:> 0.0 true,in :<=0.0  false     
-            	if(!isInsideOut && intersect.IntersectG.subsurfaceScatter > 0)
-                {            
-                    float random = rand(intersect.IntersectP.xy);         
-				    colorMask *= subScatterFS(intersect,random);
-                }
-                
+            {                      
+                 bool isInsideOut = dot(r.dir,intersect.IntersectN) > 0.0; //out:> 0.0 true,in :<=0.0  false     
                 if(intersect.IntersectG.refractive > 0)   //refractive object must have reflective
                 {
                     vec3 random = vec3(rand(intersect.IntersectP.xy),rand(intersect.IntersectP.xz),rand(intersect.IntersectP.yz)) ;
@@ -739,6 +730,11 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
                     {
                         r.dir = reflectR;
                         r.origin = intersect.IntersectP + shift * r.dir;
+                                            if(intersect.IntersectG.subsurfaceScatter > 0)
+                    {            
+                        float random = rand(intersect.IntersectP.xy);         
+                        colorMask *= subScatterFS(intersect,random);
+                    }
                     }
                     else
                     {
@@ -756,7 +752,12 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
                     col = colorMask;
                 }
                 else if(intersect.IntersectG.reflective > 0)
-                {
+                {  
+                    if(intersect.IntersectG.subsurfaceScatter > 0)
+                    {            
+                        float random = rand(intersect.IntersectP.xy);         
+                        colorMask *= subScatterFS(intersect,random);
+                    }
                     colorMask *= intersect.IntersectG.color;
                     col = colorMask;
                     r.IOR = 1.0;               
@@ -781,12 +782,18 @@ void main(void)
 	r.origin = cameraPos.xyz;
 	r.dir = normalize(InitRay);
 
+    //screenz = 0.0
+    float t = (0.0 - cameraPos.z)/ r.dir.z;
+    vec3 InitPixel = r.origin + t * r.dir;
 
     if(SSAA>0)
     {
-        float u = 0.001 * sin( getrandom(vec3(12.9898, 78.233, 151.7182), time) );
-	    float v = 0.001 * sin( getrandom(vec3(63.7264, 10.873, 623.6736), time+1.0) );
-        r.dir = normalize( InitRay + vec3(u,v,0));
+        float random = rand(InitRay.xy);        
+
+        //jitter
+        float u = sin(getrandom(vec3(12.9898, 78.233, 151.7182), random + time))/2.0;
+	    float v = cos(getrandom(vec3(63.7264, 10.873, 623.6736), time + 1.5 *random))/2.0;
+        r.dir = normalize( InitPixel - cameraPos);
     }
 
 	r.IOR = 1.0;		
