@@ -365,14 +365,14 @@ function initDfaultScene() {
 
     //Walls
     var WallScale = 10.0;
-    var WallTrans = 5.0; 
+    var WallTrans = 5.0;
 
     DefaultDatas.push({
         obj_pos: [0.0, 0.0, -WallTrans],
-        obj_scale: [WallScale, WallScale, 0.1],
-        obj_rotation: [0.0, 0.0, 0.0],
+        obj_scale: [WallScale, 1.0, WallScale],
+        obj_rotation: [90.0, 0.0, 0.0],
         obj_color: [1.0, 1.0, 1.0],
-        obj_type: 2,
+        obj_type: 3,
         obj_textureType: 0,
         obj_reflective: 0,
         obj_refractive: 0,
@@ -384,10 +384,10 @@ function initDfaultScene() {
 
     DefaultDatas.push({
         obj_pos: [-WallTrans, 0.0, 0.0],
-        obj_scale: [ 0.1,WallScale, WallScale],
-        obj_rotation: [0.0, 0.0, 0.0],
+        obj_scale: [ WallScale,1.0, WallScale],
+        obj_rotation: [0.0, 0.0, 270.0],
         obj_color: [0.75, 0.25, 0.25],
-        obj_type: 2,
+        obj_type: 3,
         obj_textureType: 0,
         obj_reflective: 0,
         obj_refractive: 0,
@@ -399,10 +399,10 @@ function initDfaultScene() {
 
     DefaultDatas.push({
         obj_pos: [WallTrans, 0.0, 0.0],
-        obj_scale: [0.1, WallScale, WallScale],
-        obj_rotation: [0.0, 0.0, 0.0],
+        obj_scale: [WallScale,1.0, WallScale],
+        obj_rotation: [0.0, 0.0, 90.0],
         obj_color: [0.25, 0.25, 0.75],
-        obj_type: 2,
+        obj_type: 3,
         obj_textureType: 0,
         obj_reflective: 0,
         obj_refractive: 0,
@@ -411,13 +411,28 @@ function initDfaultScene() {
         obj_emittance: 0,
         obj_subsurfaceScatter: 0
     });
-
+    	
     DefaultDatas.push({
         obj_pos: [0.0, WallTrans, 0.0],
-        obj_scale: [WallScale, 0.1, WallScale],
+        obj_scale: [WallScale, 1.0, WallScale],
+        obj_rotation: [180.0, 0.0, 0.0],
+        obj_color: [0.75, 0.75, 0.75],
+        obj_type: 3,
+        obj_textureType: 0,
+        obj_reflective: 0,
+        obj_refractive: 0,
+        obj_reflectivity: 1.0,
+        obj_indexOfRefraction: 1.0,
+        obj_emittance: 0,
+        obj_subsurfaceScatter: 0
+    });
+    	
+    DefaultDatas.push({
+        obj_pos: [0.0, -WallTrans, 0.0],
+        obj_scale: [WallScale, 1.0, WallScale],
         obj_rotation: [0.0, 0.0, 0.0],
         obj_color: [0.75, 0.75, 0.75],
-        obj_type: 2,
+        obj_type: 3,
         obj_textureType: 0,
         obj_reflective: 0,
         obj_refractive: 0,
@@ -427,20 +442,6 @@ function initDfaultScene() {
         obj_subsurfaceScatter: 0
     });
 
-    DefaultDatas.push({
-        obj_pos: [0.0, -WallTrans, 0.0],
-        obj_scale: [WallScale, 0.1, WallScale],
-        obj_rotation: [0.0, 0.0, 0.0],
-        obj_color: [0.75, 0.75, 0.75],
-        obj_type: 2,
-        obj_textureType: 0,
-        obj_reflective: 0,
-        obj_refractive: 0,
-        obj_reflectivity: 1.0,
-        obj_indexOfRefraction: 1.0,
-        obj_emittance: 0,
-        obj_subsurfaceScatter: 0
-    });
 
     //Sphere1
     DefaultDatas.push({

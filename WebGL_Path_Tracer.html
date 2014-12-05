@@ -82,7 +82,7 @@ uniform vec2 texsize;
 uniform vec2 attrtexsize;
 
 varying vec3 InitRay;
-const int MAX_OBJ_NUM = 100;
+const int MAX_OBJ_NUM = 30;
 const int numberOfObjects = MAX_OBJ_NUM;
 
 
@@ -506,28 +506,16 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
 	float closestIntersectionDistance = 100000.0;
 	vec3 tempNormal = vec3(0);
 	vec3 tempIntersectionPoint = vec3(0);
-	vec3 tempColor = vec3(0,0,0);
-	vec3 planeColor = vec3(0,0,0);
-	for(int i =0;i<numberOfObjects;++i){	
+
+	for(int i =0;i<numberOfObjects;i++){	
         if(i>=objnums)
            break;
 
         GEOM temp;
         float fix = float(i);
-        float fiy = 0.0;
-        temp.color = texture2D(attrtexture, vec2((7.0 * fix)/attw,0.0/atth)).rgb;
+        float fiy = 0.0;   
 
         temp.type = int(5.0 * texture2D(attrtexture, vec2((7.0 * fix + 1.0)/attw,fiy/atth)).r);
-        temp.textureType = int(texture2D(attrtexture, vec2((7.0 * fix + 1.0)/attw,fiy/atth)).g);
-
-        temp.reflective = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).r);
-        temp.refractive = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).g);
-        temp.reflectivity = texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).b;
-
-        temp.indexOfRefraction = max(3.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).r, 1.0);
-        temp.subsurfaceScatter = int(texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).g);
-        temp.emittance = int(25.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).b);
-
         mat4 modelview = mat4(1.0);     
         translate(modelview,20.0 * (texture2D(attrtexture, vec2((7.0 * fix + 4.0)/attw,fiy/atth)).rgb-0.5));
         vec3 rotv =  texture2D(attrtexture, vec2((7.0 * fix + 5.0)/attw,fiy/atth)).rgb;
@@ -536,34 +524,39 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
         rotateZ(modelview,360.0 * PI / 180.0 * rotv.z);
         scale(modelview,10.0 * texture2D(attrtexture, vec2((7.0 * fix + 6.0)/attw,fiy/atth)).rgb);
         temp.model = modelview;
-        temp.invmodel = inversemat(modelview);
+        temp.invmodel = inversemat(temp.model);
         temp.transinvmodel = transposemat(temp.invmodel);
 
 
 		if(temp.type == 0){
 			hitPointDistance = intersectSphere(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
 		}
-        else if(temp.type == 1)
+        else if(temp.type == 3)
+        {
+		    hitPointDistance = intersectPlane(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
+        }
+        else 
         {
 		    hitPointDistance = intersectCube(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
         }
-        else if(temp.type == 2)
-        {
-		    hitPointDistance = intersectCube(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
-        }
-        //if (temp.type == 3)
-           // hitPointDistance = intersectPlane(temp, r.origin, r.dir, t, tempNormal, tempIntersectionPoint);
 
 
-		if(hitPointDistance > 0.0){
-			if(hitPointDistance < closestIntersectionDistance){
+		if(hitPointDistance > 0.0 && hitPointDistance < closestIntersectionDistance){
+                temp.color = texture2D(attrtexture, vec2((7.0 * fix)/attw,0.0/atth)).rgb;        
+                temp.textureType = int(texture2D(attrtexture, vec2((7.0 * fix + 1.0)/attw,fiy/atth)).g);
+
+                temp.reflective = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).r);
+                temp.refractive = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).g);
+                temp.reflectivity = texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).b;
+
+                temp.indexOfRefraction = max(3.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).r, 1.0);
+                temp.subsurfaceScatter = int(texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).g);
+                temp.emittance = int(25.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).b);
+
 				closestIntersectionDistance = hitPointDistance;
-				tempColor = temp.color;
-
                 intersect.IntersectP = tempIntersectionPoint;
                 intersect.IntersectN = tempNormal;
 				intersect.IntersectG = temp;
-			}
 		}
 	}
 
@@ -721,45 +714,33 @@ float blinnPhongSpecular(in vec3 normalVec, in vec3 lightVec, in float specPower
 	
 vec3 subScatterFS(in INTERSECT intersect,in float seed)
 {	
-    GEOM light; //light at index 0 
-    float attw = attrtexsize.r;
-    float atth = attrtexsize.g;
+//    GEOM light; //light at index 0 
+//    float attw = attrtexsize.r;
+//    float atth = attrtexsize.g;
 
-    float fix = 0.0;
-    float fiy = 0.0;
-    light.color = texture2D(attrtexture, vec2((7.0 * fix)/attw,0.0/atth)).rgb;
+//    float fix = 0.0;
+//    float fiy = 0.0;
+//    light.color = texture2D(attrtexture, vec2((7.0 * fix)/attw,0.0/atth)).rgb;
 
-    light.type = int(5.0 * texture2D(attrtexture, vec2((7.0 * fix + 1.0)/attw,fiy/atth)).r);
-    light.textureType = int(texture2D(attrtexture, vec2((7.0 * fix + 1.0)/attw,fiy/atth)).g);
+//    light.type = int(5.0 * texture2D(attrtexture, vec2((7.0 * fix + 1.0)/attw,fiy/atth)).r);
 
-    light.reflective = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).r);
-    light.refractive = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).g);
-    light.reflectivity = texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).b;
-
-    light.indexOfRefraction =  3.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).r;
-    light.subsurfaceScatter = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).g);
-    light.emittance = int(25.0 * texture2D(attrtexture, vec2((7.0 * fix + 3.0)/attw,fiy/atth)).b);
-
-    mat4 modelview = mat4(1.0);     
-    translate(modelview,20.0 * (texture2D(attrtexture, vec2((7.0 * fix + 4.0)/attw,fiy/atth)).rgb-0.5));
-    vec3 rotv =  texture2D(attrtexture, vec2((7.0 * fix + 5.0)/attw,fiy/atth)).rgb;
-    rotateX(modelview,360.0 * PI / 180.0 * rotv.x);
-    rotateY(modelview,360.0 * PI / 180.0 * rotv.y);
-    rotateZ(modelview,360.0 * PI / 180.0 * rotv.z);
-    scale(modelview,10.0 * texture2D(attrtexture, vec2((7.0 * fix + 6.0)/attw,fiy/atth)).rgb);
-    light.model = modelview;
-    light.invmodel = inversemat(modelview);
-    light.transinvmodel = transposemat(inversemat(modelview));
-      	
+//    mat4 modelview = mat4(1.0);     
+//    translate(modelview,20.0 * (texture2D(attrtexture, vec2((7.0 * fix + 4.0)/attw,fiy/atth)).rgb-0.5));
+//    vec3 rotv =  texture2D(attrtexture, vec2((7.0 * fix + 5.0)/attw,fiy/atth)).rgb;
+//    rotateX(modelview,360.0 * PI / 180.0 * rotv.x);
+//    rotateY(modelview,360.0 * PI / 180.0 * rotv.y);
+//    rotateZ(modelview,360.0 * PI / 180.0 * rotv.z);
+//    scale(modelview,10.0 * texture2D(attrtexture, vec2((7.0 * fix + 6.0)/attw,fiy/atth)).rgb);
+//    light.model = modelview;
+//    light.invmodel = inversemat(modelview);
+//    light.transinvmodel = transposemat(light.invmodel);
+//      	
 	float RimScalar = 1.0;
 	float MaterialThickness = 0.3;
 	vec3 ExtinctionCoefficient = vec3(1.0,1.0,1.0);
 	vec3 SpecColor = vec3(1.0,1.0,1.0);
     vec3 lightPoint = vec3(0.0,5.0,0.0);
-//    if(light.type==0)
-//	   lightPoint = getRandomPointOnCube(light,seed);
-//    else if(light.type==2)
-//       lightPoint = getRandomPointOnSphere(light,seed);
+    //lightPoint = getRandomPointOnCube(light,seed);
 
 	vec3 p = intersect.IntersectP ;
 
