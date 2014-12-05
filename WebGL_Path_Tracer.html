@@ -77,6 +77,10 @@ uniform int SSAA;
 uniform float u_iterations;
 uniform sampler2D texture;
 uniform sampler2D attrtexture;
+
+uniform sampler2D texs[6];
+
+
 uniform vec2 texsize;
 uniform vec2 attrtexsize;
 
@@ -227,6 +231,9 @@ struct INTERSECT{
 	GEOM IntersectG;
 };
 
+
+
+/*For Intersect Detection*/
 vec3 getPointOnRay(RAY r, float t){
   return r.origin + (t - 0.0001) * normalize(r.dir);
 }
@@ -536,7 +543,7 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
 
 		if(hitPointDistance > 0.0 && hitPointDistance < closestIntersectionDistance){
                 temp.color = texture2D(attrtexture, vec2((7.0 * fix)/attw,0.0/atth)).rgb;        
-                temp.textureType = int(texture2D(attrtexture, vec2((7.0 * fix + 1.0)/attw,fiy/atth)).g);
+                temp.textureType = int(5.0 * texture2D(attrtexture, vec2((7.0 * fix + 1.0)/attw,fiy/atth)).g);
 
                 temp.reflective = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).r);
                 temp.refractive = int(1.0 * texture2D(attrtexture, vec2((7.0 * fix + 2.0)/attw,fiy/atth)).g);
@@ -560,7 +567,73 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
 }
 
 
+/*For Texture Mapping*/
+void textureMap(inout INTERSECT inter)
+{
+ //   vec3 texcol = inter.IntersectG.color;
+//	if(inter.IntersectG.textureType != -1)
+//	{
+//		if(geoms.type == 0)
+//		{
+//			vec3 NorthPole = (geoms.model * vec4(0, 0.5, 0, 1.0)).xyz;
+//			vec3 Equator = (geoms.model * vec4(0.5, 0, 0, 1.0)).xyz;
+//			vec3 Origin = (geoms.model * vec4(0,0,0,1)).xyz;
 
+//			vec3 vn = normalize(NorthPole - Origin);
+//			vec3 ve = normalize(Equator - Origin);
+
+//			float phi = acos(-dot(vn, InterSectN));
+//			float v = phi / PI;
+
+//			float theta = (acos(dot(ve, InterSectN) / sin(phi))) / (2.0 * PI);
+//			float u;
+//			if(dot(cross(vn, ve), InterSectN) > 0.0)
+//				u = theta;
+//			else
+//				u = 1.0 - theta;
+
+
+//            texcol = texture2D(texs[0], vec2(0.1,0.2)).rgb;
+
+//            inter.IntersectG.color = texcol;
+//			return;
+//		} 
+		if(inter.IntersectG.type == 2)
+		{
+           float MINNUM = 0.001;
+
+			vec3 orginP = (inter.IntersectG.invmodel * vec4(inter.IntersectP, 1.0)).rgb;
+			float u,v; 
+			if(orginP[0]-0.5<MINNUM)
+			{
+				u = orginP[1]+0.5;
+			    v = orginP[2]+0.5;
+			}
+			else if(orginP[1]-0.5<MINNUM)
+			{
+				u = orginP[0]+0.5;
+				v = orginP[2]+0.5;
+			}
+			else if(orginP[2]-0.5<MINNUM)
+			{
+				u = orginP[0]+0.5;
+				v = orginP[1]+0.5;
+			}
+
+            u = clamp(u,0.0,1.0);
+            v = clamp(v,0.0,1.0);
+            vec3 texcol = texture2D(texs[0], vec2(u,v)).rgb;
+            inter.IntersectG.color = texcol;
+			return;
+		}
+		//else
+			//return;
+	//}
+
+   // return;
+}
+
+/*For Random Stuff*/
 float getrandom(vec3 noise, float seed) {
 	return fract(sin(dot(InitRay + seed, noise)) * 43758.5453 + seed);
 }
@@ -691,6 +764,7 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
         float seed = time + float(i);
         
 		if (intersectWorld(r, intersect,dist)) {	
+            //textureMap(intersect);
 			if(intersect.IntersectG.emittance > 0)
 			{//is light
 				colorMask = colorMask * intersect.IntersectG.color * float(intersect.IntersectG.emittance);
@@ -786,15 +860,28 @@ void main(void)
     float t = (0.0 - cameraPos.z)/ r.dir.z;
     vec3 InitPixel = r.origin + t * r.dir;
 
+    float r1 = sin(getrandom(r.dir*vec3(12.9898, 78.233, 151.7182), time));
+	float r2 = cos(getrandom(r.dir*vec3(63.7264, 10.873, 623.6736), time + 1.0));
     if(SSAA>0)
     {
-        float random = rand(InitRay.xy);        
-
         //jitter
-        float u = sin(getrandom(vec3(12.9898, 78.233, 151.7182), random + time))/2.0;
-	    float v = cos(getrandom(vec3(63.7264, 10.873, 623.6736), time + 1.5 *random))/2.0;
+        float u = r1/2.0/texsize.r;
+        float v = r2/2.0/texsize.g;
+        InitPixel += vec3(u,v,0.0);
         r.dir = normalize( InitPixel - cameraPos);
     }
+
+//    bool DOFbool = true;
+//    if(DOFbool)
+//    {
+//        float u = (r1 + 1.0)/2.0;
+//	    float v = (r2 + 1.0)/2.0;
+//        vec3 offset = vec3(u * cos(PI *2.0 *v), u * sin(PI *2.0 *v), 0.0) * 0.7;
+//        vec3 view = normalize(vec3(0.0)-cameraPos);
+//        vec3 p = r.origin + r.dir * 10.0 / dot(view, r.dir);
+//        r.origin = r.origin + offset;
+//        r.dir = normalize(p - r.origin);
+//    }
 
 	r.IOR = 1.0;		
 
@@ -812,7 +899,6 @@ void main(void)
 precision highp float;
 
 attribute vec3 aVertex;
-
 varying vec2 v_texCoord;
 
 void main(void)
