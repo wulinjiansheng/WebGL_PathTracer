@@ -48,11 +48,23 @@ Basic Features:
 -------------------------------------------------------------------------------
 Implementation Details:
 -------------------------------------------------------------------------------
+1. WebGL framework
+(1)ping pong textures
+(2)texture parameters
 
+2.path tracer
+
+
+3. ui
 
 -------------------------------------------------------------------------------
 PERFORMANCE EVALUATION
 -------------------------------------------------------------------------------
+1. cuda webgl (default scene)
+2. webgl (time for each part)
+3. number of obj 
+4. branch, primitive intersection (load time and run time)
+5. unity function (transpose, inverse...)
 
 -------------------------------------------------------------------------------
 THIRD PARTY CODE POLICY
