@@ -78,9 +78,6 @@ uniform float u_iterations;
 uniform sampler2D texture;
 uniform sampler2D attrtexture;
 
-//uniform sampler2D texs[6];
-
-
 uniform vec2 texsize;
 uniform vec2 attrtexsize;
 
@@ -567,71 +564,6 @@ bool intersectWorld(RAY r, inout INTERSECT intersect, inout float dist) {
 }
 
 
-///*For Texture Mapping*/
-//void textureMap(inout INTERSECT inter)
-//{
-// //   vec3 texcol = inter.IntersectG.color;
-////	if(inter.IntersectG.textureType != -1)
-////	{
-////		if(geoms.type == 0)
-////		{
-////			vec3 NorthPole = (geoms.model * vec4(0, 0.5, 0, 1.0)).xyz;
-////			vec3 Equator = (geoms.model * vec4(0.5, 0, 0, 1.0)).xyz;
-////			vec3 Origin = (geoms.model * vec4(0,0,0,1)).xyz;
-
-////			vec3 vn = normalize(NorthPole - Origin);
-////			vec3 ve = normalize(Equator - Origin);
-
-////			float phi = acos(-dot(vn, InterSectN));
-////			float v = phi / PI;
-
-////			float theta = (acos(dot(ve, InterSectN) / sin(phi))) / (2.0 * PI);
-////			float u;
-////			if(dot(cross(vn, ve), InterSectN) > 0.0)
-////				u = theta;
-////			else
-////				u = 1.0 - theta;
-
-
-////            texcol = texture2D(texs[0], vec2(0.1,0.2)).rgb;
-
-////            inter.IntersectG.color = texcol;
-////			return;
-////		} 
-//		if(inter.IntersectG.type == 2)
-//		{
-//           float MINNUM = 0.001;
-
-//			vec3 orginP = (inter.IntersectG.invmodel * vec4(inter.IntersectP, 1.0)).rgb;
-//			float u,v; 
-//			if(orginP[0]-0.5<MINNUM)
-//			{
-//				u = orginP[1]+0.5;
-//			    v = orginP[2]+0.5;
-//			}
-//			else if(orginP[1]-0.5<MINNUM)
-//			{
-//				u = orginP[0]+0.5;
-//				v = orginP[2]+0.5;
-//			}
-//			else if(orginP[2]-0.5<MINNUM)
-//			{
-//				u = orginP[0]+0.5;
-//				v = orginP[1]+0.5;
-//			}
-
-//            u = clamp(u,0.0,1.0);
-//            v = clamp(v,0.0,1.0);
-//            vec3 texcol = texture2D(texs[0], vec2(u,v)).rgb;
-//            inter.IntersectG.color = texcol;
-//			return;
-//		}
-//		//else
-//			//return;
-//	//}
-
-//   // return;
-//}
 
 /*For Random Stuff*/
 float getrandom(vec3 noise, float seed) {
@@ -871,17 +803,6 @@ void main(void)
         r.dir = normalize( InitPixel - cameraPos);
     }
 
-//    bool DOFbool = true;
-//    if(DOFbool)
-//    {
-//        float u = (r1 + 1.0)/2.0;
-//	    float v = (r2 + 1.0)/2.0;
-//        vec3 offset = vec3(u * cos(PI *2.0 *v), u * sin(PI *2.0 *v), 0.0) * 0.7;
-//        vec3 view = normalize(vec3(0.0)-cameraPos);
-//        vec3 p = r.origin + r.dir * 10.0 / dot(view, r.dir);
-//        r.origin = r.origin + offset;
-//        r.dir = normalize(p - r.origin);
-//    }
 
 	r.IOR = 1.0;		
 

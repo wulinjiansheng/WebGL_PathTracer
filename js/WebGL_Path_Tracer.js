@@ -49,9 +49,6 @@ var attributes = new Uint8Array(attw * atth * 4);
 //bool for SSAA
 var SSAA = 1;
 
-//textures stuff
-var Tex1,Tex2,Tex3,Tex4,Tex5,Tex6;
-
 //render shader
 var renderProgram;
 var renderVertexAttribute;
@@ -78,19 +75,6 @@ function runGL() {
 	initGUI();
 	initDfaultScene();
 
-	Tex1 = gl.createTexture();
-	Tex2 = gl.createTexture();
-	Tex3 = gl.createTexture();
-	Tex4 = gl.createTexture();
-	Tex5 = gl.createTexture();
-	Tex6 = gl.createTexture();
-//	initializeTexture(Tex1, "assets/worldmap.png");
-//	initializeTexture(Tex2, "assets/bricks.jpg");
-//	initializeTexture(Tex3, "assets/glass.jpg");
-//	initializeTexture(Tex4, "assets/football.png");
-//	initializeTexture(Tex5, "assets/mat.png");
-//	initializeTexture(Tex6, "assets/wood.png");
-
 	animate();
 	
 	//register
@@ -102,34 +86,6 @@ function runGL() {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-function initLoadedTexture(texture) {
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-    gl.bindTexture(gl.TEXTURE_2D, null);
-}
-
-var textureCount = 0;
-function initializeTexture(texture, src) {
-
-    //texture = gl.createTexture();
-    texture.image = new Image();
-   
-    texture.image.onload = function () {
-        initLoadedTexture(texture);
-
-        // Animate once textures load.
-        if (++textureCount === 6) {
-            animate();
-        }
-    }
-    texture.image.src = src;
-}
-
 
 function initGL(){
 	message = document.getElementById("message");
@@ -217,12 +173,6 @@ function initializeShader() {
 	u_texsizeLocation = gl.getUniformLocation(shaderProgram, "texsize");
 	u_attrtexsizeLocation = gl.getUniformLocation(shaderProgram, "attrtexsize");
 	u_SSAALocation = gl.getUniformLocation(shaderProgram, "SSAA");
-
-    //6 textures
-	for (var i = 0; i < 6; i++) {
-	    u_texLocations.push(gl.getUniformLocation(shaderProgram, "texs[" + i.toString(10) + "]"));
-	}
-
 }
 
 function animate() {
@@ -271,25 +221,6 @@ function animate() {
 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, attw, atth, 0, gl.RGBA, gl.UNSIGNED_BYTE, attributes);
 	gl.uniform1i(u_attrtextureLocation, 1);
 
-
-//	gl.activeTexture(gl.TEXTURE2);
-//	gl.bindTexture(gl.TEXTURE_2D, Tex1);
-//	gl.uniform1i(u_texLocations[0], 2);
-//	gl.activeTexture(gl.TEXTURE3);
-//	gl.bindTexture(gl.TEXTURE_2D, Tex2);
-//	gl.uniform1i(u_texLocations[1], 3);
-//	gl.activeTexture(gl.TEXTURE4);
-//	gl.bindTexture(gl.TEXTURE_2D, Tex3);
-//	gl.uniform1i(u_texLocations[2], 4);
-//	gl.activeTexture(gl.TEXTURE5);
-//	gl.bindTexture(gl.TEXTURE_2D, Tex4);
-//	gl.uniform1i(u_texLocations[3], 5);
-//	gl.activeTexture(gl.TEXTURE6);
-//	gl.bindTexture(gl.TEXTURE_2D, Tex5);
-//	gl.uniform1i(u_texLocations[4], 6);
-//	gl.activeTexture(gl.TEXTURE7);
-//	gl.bindTexture(gl.TEXTURE_2D, Tex6);
-//	gl.uniform1i(u_texLocations[5], 7);
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
 	gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
