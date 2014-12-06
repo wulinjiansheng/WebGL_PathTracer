@@ -84,12 +84,12 @@ function runGL() {
 	Tex4 = gl.createTexture();
 	Tex5 = gl.createTexture();
 	Tex6 = gl.createTexture();
-	initializeTexture(Tex1, "assets/worldmap.png");
-	initializeTexture(Tex2, "assets/bricks.jpg");
-	initializeTexture(Tex3, "assets/glass.jpg");
-	initializeTexture(Tex4, "assets/football.png");
-	initializeTexture(Tex5, "assets/mat.png");
-	initializeTexture(Tex6, "assets/wood.png");
+//	initializeTexture(Tex1, "assets/worldmap.png");
+//	initializeTexture(Tex2, "assets/bricks.jpg");
+//	initializeTexture(Tex3, "assets/glass.jpg");
+//	initializeTexture(Tex4, "assets/football.png");
+//	initializeTexture(Tex5, "assets/mat.png");
+//	initializeTexture(Tex6, "assets/wood.png");
 
 	animate();
 	
@@ -272,24 +272,24 @@ function animate() {
 	gl.uniform1i(u_attrtextureLocation, 1);
 
 
-	gl.activeTexture(gl.TEXTURE2);
-	gl.bindTexture(gl.TEXTURE_2D, Tex1);
-	gl.uniform1i(u_texLocations[0], 2);
-	gl.activeTexture(gl.TEXTURE3);
-	gl.bindTexture(gl.TEXTURE_2D, Tex2);
-	gl.uniform1i(u_texLocations[1], 3);
-	gl.activeTexture(gl.TEXTURE4);
-	gl.bindTexture(gl.TEXTURE_2D, Tex3);
-	gl.uniform1i(u_texLocations[2], 4);
-	gl.activeTexture(gl.TEXTURE5);
-	gl.bindTexture(gl.TEXTURE_2D, Tex4);
-	gl.uniform1i(u_texLocations[3], 5);
-	gl.activeTexture(gl.TEXTURE6);
-	gl.bindTexture(gl.TEXTURE_2D, Tex5);
-	gl.uniform1i(u_texLocations[4], 6);
-	gl.activeTexture(gl.TEXTURE7);
-	gl.bindTexture(gl.TEXTURE_2D, Tex6);
-	gl.uniform1i(u_texLocations[5], 7);
+//	gl.activeTexture(gl.TEXTURE2);
+//	gl.bindTexture(gl.TEXTURE_2D, Tex1);
+//	gl.uniform1i(u_texLocations[0], 2);
+//	gl.activeTexture(gl.TEXTURE3);
+//	gl.bindTexture(gl.TEXTURE_2D, Tex2);
+//	gl.uniform1i(u_texLocations[1], 3);
+//	gl.activeTexture(gl.TEXTURE4);
+//	gl.bindTexture(gl.TEXTURE_2D, Tex3);
+//	gl.uniform1i(u_texLocations[2], 4);
+//	gl.activeTexture(gl.TEXTURE5);
+//	gl.bindTexture(gl.TEXTURE_2D, Tex4);
+//	gl.uniform1i(u_texLocations[3], 5);
+//	gl.activeTexture(gl.TEXTURE6);
+//	gl.bindTexture(gl.TEXTURE_2D, Tex5);
+//	gl.uniform1i(u_texLocations[4], 6);
+//	gl.activeTexture(gl.TEXTURE7);
+//	gl.bindTexture(gl.TEXTURE_2D, Tex6);
+//	gl.uniform1i(u_texLocations[5], 7);
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
 	gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
