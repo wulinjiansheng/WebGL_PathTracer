@@ -321,31 +321,6 @@ function addSphere() {
 	iterations = 0;
 }
 
-// var cylinderNum = 0;
-
-// function addCylinder(){
-	// Datas.push({
-		// obj_pos: [Math.random()*10-5, Math.random()*10-5, Math.random()*10-5],
-		// obj_scale: [1.0, 1.0, 1.0],
-		// obj_rotation: [Math.random()*360, Math.random()*360, Math.random()*360],
-		// obj_color: [Math.random(), Math.random(), Math.random()],
-		// obj_type: 1,
-		// obj_textureType: 0,
-		// obj_reflective: 0,
-		// obj_refractive: 0,
-		// obj_reflectivity: 1.0,
-		// obj_indexOfRefraction: 1.0,
-		// obj_emittance: 0,
-		// obj_subsurfaceScatter: 0
-	// });
-
-    // AddObjsAttr(Datas.length - 1);
-
-    // GUIAddObj("Cylinder " + ++cylinderNum, Datas.length - 1);	
-
-	// iterations = 0;
-// }
-
 function initDfaultScene() {
      
     //Light For Subsurface Scattering,only one light and always at first
