@@ -83,7 +83,7 @@ We add super sample anti-alisasing, which makes my render result smoother. To do
 **Reference**: https://machinesdontcare.wordpress.com/tag/subsurface/<br />
 We use a fakery way to implement subsurface scattering.
 
-- Utility functions
+- Utility functions<br />
 **Reference**: https://github.com/toji/gl-matrix<br />
 We also write some mat4 utility functions in the shader, including mat translate,rotate,scale,inverse and transpose. 
 
@@ -92,7 +92,9 @@ We also write some mat4 utility functions in the shader, including mat translate
 
 Performance Evaluation
 -------------------------------------------------------------------------------
-###1. Cuda webgl (both default scene and run for 5000 iterations)
+###1. Cuda-Path tracer vs Webgl-Path tracer
+Both test on default scene(Same objects parameters and same trace depth) and run for 5000 iterations.
+
 - Final result on cuda:<br />
 ![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/CUDA%20PathTracer%205000%20iterations.bmp)
 - Final result on WebGL:<br />
@@ -104,9 +106,11 @@ FPS Comparison:
 |---------|----------------------
 |CUDA| `6.47`
 |WebGL|  `11`
+<br />
+From the result we can see that the WebGl version has a better performace.
 
-2. webgl (time for each part)
-3. number of obj 
+###2. Webgl (Time for each part)
+###3. number of obj 
 4. branch, primitive intersection (load time and run time)
 
 
@@ -126,5 +130,5 @@ https://github.com/toji/gl-matrix<br /><br />
 
 Install and build instructions
 -------------------------------------------------------------------------------
-Run well on Chrome and Firefox.
+Run well on Windows Chrome and Firefox browser.
 
