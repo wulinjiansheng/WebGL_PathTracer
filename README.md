@@ -6,6 +6,14 @@ Members
 -------------------
 [Bo Zhang](https://www.linkedin.com/pub/bo-zhang/7b/767/815) , [Ying Li](https://www.linkedin.com/in/liying3) <br />
 
+Demo
+-------------------
+[WebGL PathTracer](http://wulinjiansheng.github.io/WebGL_PathTracer/)
+
+Video
+-------------------
+[Video Link](http://youtu.be/Hm6VyPIbKP0)
+
 Introduction
 -------------------
 In this project, we implement a WebGL version path-tracer. Most of computation of path tracer are written in the shader and we also add UI on the webpage which enables users to make their own scene.
@@ -41,11 +49,6 @@ Screenshots
 - Intersection Geometry Emittance Test<br />
 ![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/DebugIntersectMatEmit.bmp)
 <br /><br />
-
-
-Demo
--------------------
-[WebGL PathTracer](http://wulinjiansheng.github.io/WebGL_PathTracer/)
 
 
 Implementation Details:
