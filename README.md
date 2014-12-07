@@ -3,14 +3,14 @@ WebGL PathTracer
 ================
 
 Members
-================
-[Bo Zhang](https://www.linkedin.com/profile/view?id=285547985&authType=name&authToken=ZYUY&trk=prof-proj-cc-name) , [Ying Li](https://www.linkedin.com/profile/view?id=286055598&authType=NAME_SEARCH&authToken=fn9n&locale=en_US&trk=tyah2&trkInfo=tarId%3A1417916257233%2Ctas%3Aying%20li%2Cidx%3A1-1-1) <br />
+-------------------
+[Bo Zhang](https://www.linkedin.com/pub/bo-zhang/7b/767/815) , [Ying Li](https://www.linkedin.com/in/liying3) <br />
 
-INTRODUCTION:
-================
+Introduction
+-------------------
 In this project, we implement a WebGL version path-tracer. Most of computation of path tracer are written in the shader and we also add UI on the webpage which enables users to make their own scene.
 
-###Features implemented:
+####Features implemented:
 - Basic path tracer
 - Diffuse surfaces
 - Diffuse reflection
@@ -18,75 +18,132 @@ In this project, we implement a WebGL version path-tracer. Most of computation o
 - Camera interactivity
 - Subsurface scattering (Fake)
 - Super-Sample Anti alias
+- Realtime Add new primitives
 
--------------------------------------------------------------------------------
+Screenshots
+-------------------
+#### Final Result(5000 iterations):
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/FinalResultFromWebGL.bmp)
+<br />
+#### Debug views:
+- Initray Direction Test<br />
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/DebugRayDir.bmp)
+<br /><br />
+- Intersection Normal Test<br />
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/DebugIntersectNormal.bmp)
+<br /><br />
+- Intersection Position Test<br />
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/DebugIntersectPos.bmp)
+<br /><br />
+- Intersection Geometry Color Test<br />
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/DebugIntersectMatColor.bmp)
+<br /><br />
+- Intersection Geometry Emittance Test<br />
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/DebugIntersectMatEmit.bmp)
+<br /><br />
+
+
 Demo
--------------------------------------------------------------------------------
-link to demo
-link to page
-http://wulinjiansheng.github.io/WebGL_PathTracer/
-
--------------------------------------------------------------------------------
-CONTENTS:
--------------------------------------------------------------------------------
-The root directory contains the following subdirectories:
-	
-* js/ contains the javascript files, including external libraries, necessary.
-* assets/ contains the textures that will be used in the second half of the
-  assignment.
-* resources/ contains the screenshots found in this readme file.
-
--------------------------------------------------------------------------------
-Control:
--------------------------------------------------------------------------------
-The keyboard controls are as follows:
-WASDRF - Movement (along w the arrow keys)
-* W - Zoom in
-* S - Zoom out
-* A - Left
-* D - Right
-* R - Up
-* F - Down
-* ^ - Up
-* v - Down
-* < - Left
-* > - Right
-
--------------------------------------------------------------------------------
-Basic Features:
--------------------------------------------------------------------------------
+-------------------
+[WebGL PathTracer](http://wulinjiansheng.github.io/WebGL_PathTracer/)
 
 
--------------------------------------------------------------------------------
 Implementation Details:
--------------------------------------------------------------------------------
-1. WebGL framework
-(1)ping pong textures
-(2)texture parameters
+------------------------
+####1. WebGL framework
+- Ping-pong textures
+We use Ping-pong technique to mix each iteration's image with previous result. That we store the previous iteration's image in texture0 and after path tracer computation we mix texture0's color with the new computed result color and store this new iteration's image in texture1. Then we exchange texture0 and texture1 and run the next iteration, so on and so forth. 
 
-2.path tracer
+- Texture parameters
+We store the objects' information in a texture and in the shader we read objects' parameters from this texture. More specifically, every 7 pixels of the texture image store one object's information. This enables us to pass only one uniform to pass all the objects' information, which enables users to add as many objects as they want in the scene. (We set the max number of objects as 30.)
+<br /><br />
+**Store Pattern:**<br />
+####
+|Pixel | Object's Parameter
+|---------|----------------------
+|0 | `Color`
+|1 |  `Objtype,Texturetype`
+|2 | `Refelective,Refractive`
+|3 | `IOR,Subsurface Scattering,Emittance`
+|4 | `Translation`
+|5 | `Rotation`
+|6 | `Scale`
 
 
-3. ui
+###2. Path tracer
+- Fresnel Based Reflection & Refraction<br />
+**Reference**: http://en.wikipedia.org/wiki/Fresnel_equations<br />
+We add fresnel reflection and refraction. And it enables us to add transparent objects in the scene. To do this, we just use the fresnel equations to compute the reflective and refractive coefficients whenever the ray hits a refractive object, and get the reflect ray and refract ray. Then we generate a random number to decide which ray to return, based on the reflective and refractive coefficients. 
 
--------------------------------------------------------------------------------
-PERFORMANCE EVALUATION
--------------------------------------------------------------------------------
-1. cuda webgl (default scene)
-2. webgl (time for each part)
-3. number of obj 
-4. branch, primitive intersection (load time and run time)
-5. unity function (transpose, inverse...)
+- Super sample anti-alisasing<br />
+**Reference**: http://en.wikipedia.org/wiki/Supersampling<br />
+We add super sample anti-alisasing, which makes my render result smoother. To do this, just jitter the initial rays randomly in each iteration. <br />
 
+(SSAA comparison: right is with SSAA; 2500 iterations)<br/>
+![Alt text]()
+<br /><br />
+
+- Subsurface scattering (Fake)<br />
+**Reference**: https://machinesdontcare.wordpress.com/tag/subsurface/<br />
+We use a fakery way to implement subsurface scattering.<br />
+We can see that light is scattered by interacting with the transparent sphere.<br />
+
+(Subsurface Scatering comparison: right is with subsurface scattering; 2500 iterations with SSAA)<br/>
+![Alt text]()
+<br /><br />
+
+- Utility functions<br />
+**Reference**: https://github.com/toji/gl-matrix<br />
+We also write some mat4 utility functions in the shader, including mat translate,rotate,scale,inverse and transpose. 
+
+###3. UI
+
+
+Performance Evaluation
 -------------------------------------------------------------------------------
-THIRD PARTY CODE POLICY
+###1. Cuda-Path tracer vs Webgl-Path tracer
+Both test on default scene(Same objects parameters and same trace depth) and run for 5000 iterations.
+
+- Final result on cuda (800X800):<br />
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/CUDA%20PathTracer%205000%20iterations.bmp)
+- Final result on WebGL (800X800):<br />
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/FinalResultFromWebGL.bmp)
+<br /><br />
+**FPS Comparison:**<br />
+
+|Version | Average FPS
+|---------|----------------------
+|CUDA | `6.47`
+|WebGL |  `12`
+<br />
+From the result we can see that the WebGl version has a better performace.
+
+###2. Webgl (From firefox performance: Time for each part)
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/performance_firefox.JPG)
+###3. Number of objects<br />
+Scene size: 800 X 800
+
+|Number of Objects| Average FPS
+|---------|----------------------
+|Default(14) | `12`
+|20 |  `9`
+|Max(30) |  `6`
+<br />
+
+Thrid Party Code
 -------------------------------------------------------------------------------
-* stas.js  
-It's a library to visualize realize fps and timing.  
+* stas.js:<br />
+It's a library to visualize realize fps and timing.<br />
 https://github.com/mrdoob/stats.js/
-* random noise in GLSL:  
-http://byteblacksmith.com/improvements-to-the-canonical-one-liner-glsl-rand-for-opengl-es-2-0/
+* dat.gui.js:<br />
+A lightweight graphical user interface for changing variables in JavaScript.<br />
+https://code.google.com/p/dat-gui/
+* gl-matrix.js:<br />
+Javascript Matrix and Vector library for High Performance WebGL apps.<br />
+https://github.com/toji/gl-matrix<br /><br />
 
+
+Install and build instructions
 -------------------------------------------------------------------------------
-ACKNOWLEDGEMENTS
--------------------------------------------------------------------------------
+Run well on Windows Chrome and Firefox browser.
+
