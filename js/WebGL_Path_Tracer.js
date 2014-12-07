@@ -47,7 +47,7 @@ var attw = 1024;  //width
 var atth = 2; //height
 var attributes = new Uint8Array(attw * atth * 4);
 //bool for SSAA
-var SSAA = 1;
+var SSAA = 0;
 
 //render shader
 var renderProgram;
@@ -82,7 +82,7 @@ function runGL() {
 	canvas.oncontextmenu = function (ev) { return false; };
 	document.onmouseup = handleMouseUp;
 	document.onmousemove = handleMouseMove;
-	
+	document.onkeydown = handleKeyDown;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -182,68 +182,73 @@ function animate() {
 	
 	message.innerHTML = "Iterations: " + (iterations).toString();
 
-	///////////////////////////////////////////////////////////////////////////
-	// Render
-	gl.useProgram(shaderProgram);
+	if (!pause || iterations == 0)
+	{
+		///////////////////////////////////////////////////////////////////////////
+		// Render
+		gl.useProgram(shaderProgram);
 
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	var modelview = mat4.create();
-	mat4.lookAt([eye.x, eye.y, eye.z], [center.x, center.y, center.z], [up.x, up.y, up.z], modelview);
+		var modelview = mat4.create();
+		mat4.lookAt([eye.x, eye.y, eye.z], [center.x, center.y, center.z], [up.x, up.y, up.z], modelview);
 
-	var projection = mat4.create();
-	mat4.perspective(FOVY, canvas.width / canvas.height, 0.1, 100.0, projection);
+		var projection = mat4.create();
+		mat4.perspective(FOVY, canvas.width / canvas.height, 0.1, 100.0, projection);
 
-	var modelviewprojection = mat4.create();
-	mat4.multiply(projection, modelview, modelviewprojection);
+		var modelviewprojection = mat4.create();
+		mat4.multiply(projection, modelview, modelviewprojection);
 
-	var inversemp = mat4.create();
-	mat4.inverse(modelviewprojection, inversemp);
+		var inversemp = mat4.create();
+		mat4.inverse(modelviewprojection, inversemp);
+		
+		gl.uniformMatrix4fv(u_vInvMPLocation, false, inversemp);
+		gl.uniform3f(u_veyeLocation, eye.x, eye.y, eye.z);
+		gl.uniform3f(u_eyeLocation, eye.x, eye.y, eye.z);
+		gl.uniform1f(u_timeLocation, time);
+		gl.uniform1f(u_itrLocation, iterations);
+		gl.uniform1i(u_numsLocation, Datas.length);
+		gl.uniform1i(u_SSAALocation, SSAA);
+		//Added for texture size
+		gl.uniform2f(u_texsizeLocation, canvas.width,canvas.height);
+		gl.uniform2f(u_attrtexsizeLocation, attw, atth);
+
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, textures[0]);
+		gl.uniform1i(u_textureLocation, 0);
+
+
+		gl.activeTexture(gl.TEXTURE1);  //attributes for objects
+		gl.bindTexture(gl.TEXTURE_2D, objattrtex);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, attw, atth, 0, gl.RGBA, gl.UNSIGNED_BYTE, attributes);
+		gl.uniform1i(u_attrtextureLocation, 1);
+
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+		gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[1], 0);
+		gl.vertexAttribPointer(VertexLocation, 2, gl.FLOAT, false, 0, 0);
+		
+
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+		textures.reverse();
+
+		gl.useProgram(renderProgram);
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, textures[0]);
+		gl.uniform1i(u_textureLocationc, 0);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+		gl.vertexAttribPointer(renderVertexAttribute, 2, gl.FLOAT, false, 0, 0);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+		iterations++;
+		time += 1.0;
 	
-	gl.uniformMatrix4fv(u_vInvMPLocation, false, inversemp);
-	gl.uniform3f(u_veyeLocation, eye.x, eye.y, eye.z);
-	gl.uniform3f(u_eyeLocation, eye.x, eye.y, eye.z);
-	gl.uniform1f(u_timeLocation, time);
-	gl.uniform1f(u_itrLocation, iterations);
-	gl.uniform1i(u_numsLocation, Datas.length);
-	gl.uniform1i(u_SSAALocation, SSAA);
-	//Added for texture size
-	gl.uniform2f(u_texsizeLocation, canvas.width,canvas.height);
-	gl.uniform2f(u_attrtexsizeLocation, attw, atth);
-
-	gl.activeTexture(gl.TEXTURE0);
-	gl.bindTexture(gl.TEXTURE_2D, textures[0]);
-	gl.uniform1i(u_textureLocation, 0);
-
-
-	gl.activeTexture(gl.TEXTURE1);  //attributes for objects
-	gl.bindTexture(gl.TEXTURE_2D, objattrtex);
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, attw, atth, 0, gl.RGBA, gl.UNSIGNED_BYTE, attributes);
-	gl.uniform1i(u_attrtextureLocation, 1);
-
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
-	gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
-	gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[1], 0);
-	gl.vertexAttribPointer(VertexLocation, 2, gl.FLOAT, false, 0, 0);
+	}
 	
-
-	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-	textures.reverse();
-
-	gl.useProgram(renderProgram);
-	gl.activeTexture(gl.TEXTURE0);
-	gl.bindTexture(gl.TEXTURE_2D, textures[0]);
-	gl.uniform1i(u_textureLocationc, 0);
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
-	gl.vertexAttribPointer(renderVertexAttribute, 2, gl.FLOAT, false, 0, 0);
-	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-	iterations++;
-	time += 1.0;
 	window.requestAnimFrame(animate);
 }
 
@@ -567,8 +572,8 @@ function defaultScene() {
 }
 
 function resize() {
-	canvas.height = width;
-	canvas.width = height;
+	canvas.width = width;
+	canvas.height = height;
 	
 	gl.viewport(0, 0, canvas.width, canvas.height);
 	
@@ -622,6 +627,8 @@ var mouseRightDown = false;
 var mouseMidDown = false;
 var lastMouseX = null;
 var lastMouseY = null;
+
+var pause = false;
 
 function handleMouseDown(event) {
     if (event.button == 2) {
@@ -693,6 +700,28 @@ function handleMouseMove(event) {
     iterations = 0;
 }
 
+function handleKeyDown(event){
+	if (event.keyCode == 32)
+		pause = !pause;
+}
+
+var toHide = true;
+function toggleContorller(){
+	if (toHide)
+	{
+		document.getElementById("icon").style.background = 'url("left-arrow.png")';
+		document.getElementById("gui-left").style.display = "none";
+		document.getElementById("gui-right").style.display = "none";
+	}
+	else 
+	{
+		document.getElementById("icon").style.background = 'url("right-arrow.png")';
+		document.getElementById("gui-left").style.display = "block";
+		document.getElementById("gui-right").style.display = "block";
+	}
+	toHide = !toHide;
+}
+
 
 /////////////////////////////////////////////////////////////////////////
 /*******************************GUI*************************************/
@@ -707,8 +736,10 @@ var width;
 var height;
 
 function initGUI() {
-    //gui
-    //gui = new dat.GUI();    
+	width = canvas.width;
+	height = canvas.height;
+
+    //gui  
     gui1 = new dat.GUI({ autoPlace: false });
     var container = document.getElementById('gui-right');
     container.appendChild(gui1.domElement);
@@ -718,14 +749,21 @@ function initGUI() {
     gui1.add(guiConfig, 'width').onChange(function () {
         width = guiConfig.width;
     });
-     gui1.add(guiConfig, 'height').onChange(function () {
+    gui1.add(guiConfig, 'height').onChange(function () {
         height = guiConfig.height;
+    });
+	
+	gui1.add(guiConfig, 'antiAliasing').onChange(function () {
+        SSAA = (guiConfig.antiAliasing == true) ? 1 : 0;
+		iterations = 0;
     });
 }
 
 function GUIConfig() {
-    this.width = canvas.width;
-    this.height = canvas.height;
+    this.width = width;
+    this.height = height;
+	
+	this.antiAliasing = (SSAA == 1) ? true : false;
 }
 
 function GUIDefaultScene(){
@@ -755,7 +793,7 @@ function GUIObj(id) {
     this.refract = (Datas[id].obj_refractive == 1) ? true : false ;
     this.IOR = Datas[id].obj_indexOfRefraction;
     this.emittance = Datas[id].obj_emittance;
-    this.scatter = (Datas[id].obj_subsurfaceScatter == 1) ? true : false ;
+    this.subsurfaceScatter = (Datas[id].obj_subsurfaceScatter == 1) ? true : false ;
 };
 
 function GUIAddObj(name, id) {
@@ -834,8 +872,8 @@ function GUIAddObj(name, id) {
         AddObjsAttr(id);
         iterations = 0;
     });
-    folder.add(guiObjs[i], 'scatter').onChange(function () {
-        Datas[id].obj_subsurfaceScatter = guiObjs[i].scatter;
+    folder.add(guiObjs[i], 'subsurfaceScatter').onChange(function () {
+        Datas[id].obj_subsurfaceScatter = guiObjs[i].subsurfaceScatter;
         AddObjsAttr(id);
         iterations = 0;
     });
