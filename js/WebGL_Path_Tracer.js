@@ -468,7 +468,7 @@ function initDfaultScene() {
         obj_reflective: 1,
         obj_refractive: 1,
         obj_reflectivity: 1.0,
-        obj_indexOfRefraction: 1.5,
+        obj_indexOfRefraction: 3.0,
         obj_emittance: 0,
         obj_subsurfaceScatter: 1
     });
