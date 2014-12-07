@@ -7,7 +7,8 @@
     <style>
         body{ background: #000; color: #ccc; font-size:14px; font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;}
 		h1{color:white;}
-        .text{text-align: center; height:92px;}
+		a{color:white;}
+        #title{text-align: center; height:92px;}
         #convasContainer{float: left;}
         #canvas{border: none;}
         #message{margin-top:5px; text-align: center;}
@@ -19,11 +20,11 @@
         #gui-right, #gui-left{ width:200px; float:left; margin-left:5px;}
 		#info{float:left; padding:0 10px; width:220px; line-height:1.3; font-size:14px;}
 		#info h3{margin:12px 0 0 0;font-size:15px; color:white;}
-		a{color:white;}
+		#time{position:absolute; top:0px; left:10px;}
     </style>
 </head>
 <body>
-    <div class="text">
+    <div id="title">
         <h1>WebGL Path Tracing</h1>
 		Made by <a href="https://www.linkedin.com/pub/bo-zhang/7b/767/815" target="_blank">Bo Zhang</a> and <a href="https://www.linkedin.com/in/liying3" target="_blank">Ying Li</a>
     </div>
@@ -38,7 +39,6 @@
             <div class="buttons">
                 <input type="button" value="Add Cube" onclick="addCube();" />
                 <input type="button" value="Add Sphere" onclick="addSphere();" />
-				<!-- <input type="button" value="Add Cylinder" onclick="addCylinder();" /> -->
             </div>
         </div>
         <div id = "gui-right">
@@ -48,25 +48,26 @@
             </div>
         </div>
 		<div id ="info">
-		Path tracing is a method of rendering images faithful to reality. The core algorithm of this WebGL Path Tracer is implemented in GLSL fragment shader. Each ray bounces in the scene around five times.<br/><br/>A <a href="..." target="_blank">Demo</a> is uploaded in YouTube and code is provided in <a href="https://github.com/wulinjiansheng/WebGL_PathTracer" target="_blank">GitHub</a>.
-		<h3>Features:</h3>
-		<ul>
-			<li>Diffuse and Blinn-Phong</li>
-			<li>Fresnel Reflection and Refraction</li>
-			<li>Subsurface Scattering</li>
-			<li>Super Sampling Anti-aliasing</li>
-			<li>Intersection</li>
-		</ul>
-		<h3>Interaction:</h3>
-		<ul>
-			<li>Space: pause toggle</li>
-			<li>Left button: rotate scene</li>
-			<li>Middle button: translate scene</li>
-			<li>Right button: zoom in/ out</li>
-			<li>Control panel: add objects and change attributes</li>
-		</ul>
-		<div>
-    </div>
+			Path tracing is a method of rendering images faithful to reality. The core algorithm of this WebGL Path Tracer is implemented in GLSL fragment shader. Each ray bounces in the scene around five times.<br/><br/>A <a href="https://www.youtube.com/watch?v=Hm6VyPIbKP0&feature=youtu.be" target="_blank">Demo</a> is uploaded in YouTube and code is provided in <a href="https://github.com/wulinjiansheng/WebGL_PathTracer" target="_blank">GitHub</a>.
+			<h3>Features:</h3>
+			<ul>
+				<li>Diffuse and Blinn-Phong</li>
+				<li>Fresnel Reflection and Refraction</li>
+				<li>Subsurface Scattering</li>
+				<li>Super Sampling Anti-aliasing</li>
+				<li>Intersection</li>
+			</ul>
+			<h3>Interaction:</h3>
+			<ul>
+				<li>Space: pause toggle</li>
+				<li>Left button: rotate scene</li>
+				<li>Middle button: translate scene</li>
+				<li>Right button: zoom in/ out</li>
+				<li>Control panel: add objects and change attributes</li>
+			</ul>
+		</div>
+	</div>
+	<div id = "time"></div>
     <script id="vs_pathTracer" type="x-shader/x-vertex">
 precision highp float;
 
