@@ -78,18 +78,16 @@ We add fresnel reflection and refraction. And it enables us to add transparent o
 - Super sample anti-alisasing<br />
 **Reference**: http://en.wikipedia.org/wiki/Supersampling<br />
 We add super sample anti-alisasing, which makes my render result smoother. To do this, just jitter the initial rays randomly in each iteration. <br />
-
-(SSAA comparison: right is with SSAA; 2500 iterations)<br/>
-![Alt text]()
+(Right image is with SSAA; 1500 iterations)<br/>
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/SSAA%20comparison.bmp)
 <br /><br />
 
 - Subsurface scattering (Fake)<br />
 **Reference**: https://machinesdontcare.wordpress.com/tag/subsurface/<br />
 We use a fakery way to implement subsurface scattering.<br />
-We can see that light is scattered by interacting with the transparent sphere.<br />
-
-(Subsurface Scatering comparison: right is with subsurface scattering; 2500 iterations with SSAA)<br/>
-![Alt text]()
+We can see that light is scattered by interacting with the transparent sphere. But the result is still not very realistic.<br />
+(Right image is with subsurface scattering; 2500 iterations with SSAA)<br/>
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/subsurface%2Bssaa.bmp)
 <br /><br />
 
 - Utility functions<br />
