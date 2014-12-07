@@ -20,6 +20,12 @@ In this project, we implement a WebGL version path-tracer. Most of computation o
 - Super-Sample Anti alias
 - Realtime Add new primitives
 
+Demo
+-------------------
+- Website: [WebGL PathTracer](http://wulinjiansheng.github.io/WebGL_PathTracer/)<br/>
+- Video: <br/ >
+[![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/cover.jpg)]((http://youtu.be/Hm6VyPIbKP0))
+
 Screenshots
 -------------------
 #### Final Result(5000 iterations):
@@ -147,11 +153,3 @@ https://github.com/toji/gl-matrix<br /><br />
 Install and build instructions
 -------------------------------------------------------------------------------
 Run well on Windows Chrome and Firefox browser.
-
-Demo
--------------------
-[WebGL PathTracer](http://wulinjiansheng.github.io/WebGL_PathTracer/)
-
-Video
--------------------
-[Video Link](http://youtu.be/Hm6VyPIbKP0)
