@@ -113,8 +113,14 @@ Both test on default scene(Same objects parameters and same trace depth) and run
 <br />
 From the result we can see that the WebGl version has a better performace.
 
-###2. Webgl (From firefox performance: Time for each part)
-![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/performance_firefox.JPG)
+###2. Webgl (Timing of each Procedure)
+|Procedure| Timing (ms)
+|---------|----------------------
+|Initialize WebGL | `7`
+|Initialize Shader |  `45`
+|Load Scene |  `42`
+|Draw Scene (Avg.) |  `42`
+<br />
 ###3. Number of objects<br />
 Scene size: 800 X 800
 
