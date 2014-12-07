@@ -88,7 +88,7 @@ We use a fakery way to implement subsurface scattering.
 We also write some mat4 utility functions in the shader, including mat translate,rotate,scale,inverse and transpose. 
 
 ###3. UI
-
+We use dat.gui.js to provide UI for the path tracer scene. Users can resize the size of rendered image, add new objects, currently including cube and sphere, to the current scene; and change the attribute of the objects. Once the configuration of the scene is changed, the image will be clear and rendered again.
 
 Performance Evaluation
 -------------------------------------------------------------------------------
