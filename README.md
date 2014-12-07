@@ -1,11 +1,23 @@
-WebGL_PathTracer
+
+WebGL PathTracer
 ================
 
-By Bo Zhang, Ying Li
--------------------------------------------------------------------------------
+Members
+================
+[Bo Zhang](https://www.linkedin.com/profile/view?id=285547985&authType=name&authToken=ZYUY&trk=prof-proj-cc-name) , [Ying Li](https://www.linkedin.com/profile/view?id=286055598&authType=NAME_SEARCH&authToken=fn9n&locale=en_US&trk=tyah2&trkInfo=tarId%3A1417916257233%2Ctas%3Aying%20li%2Cidx%3A1-1-1) <br />
+
 INTRODUCTION:
--------------------------------------------------------------------------------
-In this project, I wrote a basic deferred shading with GLSL and OpenGL. In this deferred lighting pipeline, I implemented some simple effects, including Diffuse and Blinn-Phong shading, Bloom, "Toon" shading, and Screen Space Ambient Occlusion.
+================
+In this project, we implement a WebGL version path-tracer. Most of computation of path tracer are written in the shader and we also add UI on the webpage which enables users to make their own scene.
+
+###Features implemented:
+- Basic path tracer
+- Diffuse surfaces
+- Diffuse reflection
+- Fresnel Based Reflection & Refraction
+- Camera interactivity
+- Subsurface scattering (Fake)
+- Super-Sample Anti alias
 
 -------------------------------------------------------------------------------
 Demo
