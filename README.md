@@ -52,7 +52,7 @@ Implementation Details:
 ------------------------
 ####1. WebGL framework
 - Ping-pong textures
-We use Ping-pong technique to mix each iteration's image with previous result. That we store the previous iteration's image in texture0 and after path tracer computation we mix texture0's color with the new computed result color and store this new iteration's image in texture1. Then we exchange texture0 and texture1 and run the next iteration, so on and so forth. 
+We use Ping-pong technique to mix each iteration's image with previous result. That we store the previous iteration's image in texture0 and after path tracing computation we mix texture0's color with the new computed result color and store this new iteration's image in texture1. Then we exchange texture0 and texture1 and run the next iteration, so on and so forth. 
 
 - Texture parameters
 We store the objects' information in a texture and in the shader we read objects' parameters from this texture. More specifically, every 7 pixels of the texture image store one object's information. This enables us to pass only one uniform to pass all the objects' information, which enables users to add as many objects as they want in the scene. 
@@ -88,7 +88,10 @@ We use a fakery way to implement subsurface scattering.
 We also write some mat4 utility functions in the shader, including mat translate,rotate,scale,inverse and transpose. 
 
 ###3. UI
-We use dat.gui.js to provide UI for the path tracer scene. Users can resize the size of rendered image, add new objects, currently including cube and sphere, to the current scene; and change the attribute of the objects. Once the configuration of the scene is changed, the image will be clear and rendered again.
+- We use dat.gui.js to provide UI for the path tracer scene. Users can resize the size of rendered image, add new objects, currently including cube and sphere, to the current scene; and change the attribute of the objects. Once the configuration of the scene is changed, the image will be clear and rendered again.
+
+- We also provide mouse interaction to translate, rotate and zoom in/ out the scene. We use plane to represent the wall, so the wall will be cur off if not faced to camera.
+
 
 Performance Evaluation
 -------------------------------------------------------------------------------
