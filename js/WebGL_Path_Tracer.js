@@ -279,6 +279,8 @@ function AddObjsAttr(i) {
 
 var cubeNum = 0;
 function addCube() {
+    if (Datas.length == 31)
+        return;
 	Datas.push({
 		obj_pos: [Math.random()*10-5, Math.random()*10-5, Math.random()*10-5],
 		obj_scale: [1.0, 1.0, 1.0],
@@ -304,6 +306,8 @@ function addCube() {
 var sphereNum = 3;
 
 function addSphere() {
+    if (Datas.length == 31)
+        return;
 	Datas.push({
 		obj_pos: [Math.random()*10-5, Math.random()*10-5, Math.random()*10-5],
 		obj_scale: [1.0, 1.0, 1.0],
@@ -798,6 +802,9 @@ function GUIObj(id) {
 
 function GUIAddObj(name, id) {
     var i = guiObjs.length;
+    if (Datas.length == 31)
+        return;
+
     guiObjs.push( new GUIObj(id));
 
     var folder = gui2.addFolder(name);
