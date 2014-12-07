@@ -69,11 +69,23 @@ var stats = initStats();
 ///////////////////////////////////////////////////////////////////////////
 
 function runGL() {
+	var begin = Date.now();
 	initGL();
+	var end = Date.now();
+	document.getElementById("time").innerHTML +=  "Initialize WebGL: " + (end-begin).toString() + " ms<br/>";
+	
+	begin = end;
 	initBuffers();
 	initializeShader();
+	end = Date.now();
+	document.getElementById("time").innerHTML +=  "Initialize Shader: " + (end-begin).toString() + " ms<br/>";
+	
 	initGUI();
+	
+	begin = end;
 	initDfaultScene();
+	end = Date.now();
+	document.getElementById("time").innerHTML += "Load Scene: " + (end-begin).toString() + " ms";
 
 	animate();
 	
@@ -614,7 +626,7 @@ function initStats() {
 
 	// Align top-left
 	stats.domElement.style.position = 'absolute';
-	stats.domElement.style.left ='0px';
+	stats.domElement.style.left ='200px';
 	stats.domElement.style.top = '0px';
 
 	document.body.appendChild(stats.domElement);
