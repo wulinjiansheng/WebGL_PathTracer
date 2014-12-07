@@ -696,7 +696,6 @@ vec3 pathTrace(inout RAY r, int rayDepth, inout vec3 col){
         float seed = time + float(i);
         
 		if (intersectWorld(r, intersect,dist)) {	
-            //textureMap(intersect);
 			if(intersect.IntersectG.emittance > 0)
 			{//is light
 				colorMask = colorMask * intersect.IntersectG.color * float(intersect.IntersectG.emittance);
@@ -811,7 +810,6 @@ void main(void)
 
 	vec3 texCol = texture2D(texture, vec2(gl_FragCoord.x / texsize.r,gl_FragCoord.y / texsize.g) ).rgb;
 	gl_FragColor = vec4(mix( finalCol/5.0, texCol,u_iterations / (1.0+u_iterations)), 1.0);
-
 }
 
     </script>
