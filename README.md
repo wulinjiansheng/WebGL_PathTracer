@@ -52,10 +52,10 @@ Implementation Details:
 ------------------------
 ####1. WebGL framework
 - Ping-pong textures
-We use Ping-pong technique to mix each iteration's image with previous result. That we store the previous iteration's image in texture0 and after path tracing computation we mix texture0's color with the new computed result color and store this new iteration's image in texture1. Then we exchange texture0 and texture1 and run the next iteration, so on and so forth. 
+We use Ping-pong technique to mix each iteration's image with previous result. That we store the previous iteration's image in texture0 and after path tracer computation we mix texture0's color with the new computed result color and store this new iteration's image in texture1. Then we exchange texture0 and texture1 and run the next iteration, so on and so forth. 
 
 - Texture parameters
-We store the objects' information in a texture and in the shader we read objects' parameters from this texture. More specifically, every 7 pixels of the texture image store one object's information. This enables us to pass only one uniform to pass all the objects' information, which enables users to add as many objects as they want in the scene. 
+We store the objects' information in a texture and in the shader we read objects' parameters from this texture. More specifically, every 7 pixels of the texture image store one object's information. This enables us to pass only one uniform to pass all the objects' information, which enables users to add as many objects as they want in the scene. (We set the max number of objects as 30.)
 <br /><br />
 **Store Pattern:**<br />
 ####
@@ -88,9 +88,6 @@ We use a fakery way to implement subsurface scattering.
 We also write some mat4 utility functions in the shader, including mat translate,rotate,scale,inverse and transpose. 
 
 ###3. UI
-- We use dat.gui.js to provide UI for the path tracer scene. Users can resize the size of rendered image, add new objects, currently including cube and sphere, to the current scene; and change the attribute of the objects. Once the configuration of the scene is changed, the image will be clear and rendered again.
-
-- We also provide mouse interaction to translate, rotate and zoom in/ out the scene. We use plane to represent the wall, so the wall will be cur off if not faced to camera.
 
 
 Performance Evaluation
@@ -98,25 +95,31 @@ Performance Evaluation
 ###1. Cuda-Path tracer vs Webgl-Path tracer
 Both test on default scene(Same objects parameters and same trace depth) and run for 5000 iterations.
 
-- Final result on cuda:<br />
+- Final result on cuda (800X800):<br />
 ![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/CUDA%20PathTracer%205000%20iterations.bmp)
-- Final result on WebGL:<br />
+- Final result on WebGL (800X800):<br />
 ![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/FinalResultFromWebGL.bmp)
 <br /><br />
-FPS Comparison:
-####
+**FPS Comparison:**<br />
+
 |Version | Average FPS
 |---------|----------------------
-|CUDA| `6.47`
-|WebGL|  `11`
+|CUDA | `6.47`
+|WebGL |  `12`
 <br />
 From the result we can see that the WebGl version has a better performace.
 
-###2. Webgl (Time for each part)
-###3. number of obj 
-4. branch, primitive intersection (load time and run time)
+###2. Webgl (From firefox performance: Time for each part)
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/performance_firefox.JPG)
+###3. Number of objects<br />
+Scene size: 800 X 800
 
-
+|Number of Objects| Average FPS
+|---------|----------------------
+|Default(14) | `12`
+|20 |  `9`
+|Max(30) |  `6`
+<br />
 
 Thrid Party Code
 -------------------------------------------------------------------------------
