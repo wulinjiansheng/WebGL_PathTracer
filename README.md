@@ -4,9 +4,9 @@ WebGL PathTracer
 
 Members
 ================
-[Bo Zhang](https://www.linkedin.com/profile/view?id=285547985&authType=name&authToken=ZYUY&trk=prof-proj-cc-name) , [Ying Li](https://www.linkedin.com/profile/view?id=286055598&authType=NAME_SEARCH&authToken=fn9n&locale=en_US&trk=tyah2&trkInfo=tarId%3A1417916257233%2Ctas%3Aying%20li%2Cidx%3A1-1-1) <br />
+[Bo Zhang](https://www.linkedin.com/pub/bo-zhang/7b/767/815) , [Ying Li](https://www.linkedin.com/in/liying3) <br />
 
-INTRODUCTION:
+Introduction
 ================
 In this project, we implement a WebGL version path-tracer. Most of computation of path tracer are written in the shader and we also add UI on the webpage which enables users to make their own scene.
 
@@ -18,53 +18,45 @@ In this project, we implement a WebGL version path-tracer. Most of computation o
 - Camera interactivity
 - Subsurface scattering (Fake)
 - Super-Sample Anti alias
+- Realtime Add new primitives
 
--------------------------------------------------------------------------------
+Screenshots
+================
+### Final Result(5000 iterations):
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/FinalResultFromWebGL.bmp)
+<br />
+### Debug views:
+- Initray Direction Test<br />
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/DebugRayDir.bmp)
+<br /><br />
+- Intersection Normal Test<br />
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/DebugIntersectNormal.bmp)
+<br /><br />
+- Intersection Position Test<br />
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/DebugIntersectPos.bmp)
+<br /><br />
+- Intersection Geometry Color Test<br />
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/DebugIntersectMatColor.bmp)
+<br /><br />
+- Intersection Geometry Emittance Test<br />
+![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/DebugIntersectMatEmit.bmp)
+<br /><br />
+
+
 Demo
--------------------------------------------------------------------------------
-link to demo
-link to page
-http://wulinjiansheng.github.io/WebGL_PathTracer/
-
--------------------------------------------------------------------------------
-CONTENTS:
--------------------------------------------------------------------------------
-The root directory contains the following subdirectories:
-	
-* js/ contains the javascript files, including external libraries, necessary.
-* assets/ contains the textures that will be used in the second half of the
-  assignment.
-* resources/ contains the screenshots found in this readme file.
-
--------------------------------------------------------------------------------
-Control:
--------------------------------------------------------------------------------
-The keyboard controls are as follows:
-WASDRF - Movement (along w the arrow keys)
-* W - Zoom in
-* S - Zoom out
-* A - Left
-* D - Right
-* R - Up
-* F - Down
-* ^ - Up
-* v - Down
-* < - Left
-* > - Right
-
--------------------------------------------------------------------------------
-Basic Features:
--------------------------------------------------------------------------------
+================
+[WebGL PathTracer](http://wulinjiansheng.github.io/WebGL_PathTracer/)
 
 
--------------------------------------------------------------------------------
 Implementation Details:
--------------------------------------------------------------------------------
-1. WebGL framework
-(1)ping pong textures
+=================
+###1. WebGL framework
+(1)Ping-pong textures
+To implement path tracer, we use Ping-pong technique. That we store the previous iteration's image in texture0 and after path tracer computation we mix texture0's color with the new computed result color and store this new iteration's image in texture1. Then we exchange texture0 and texture1 and run the next iteration, so on and so forth. 
+
 (2)texture parameters
 
-2.path tracer
+###2. Path tracer
 
 
 3. ui
