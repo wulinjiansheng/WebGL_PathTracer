@@ -77,11 +77,20 @@ We add fresnel reflection and refraction. And it enables us to add transparent o
 
 - Super sample anti-alisasing<br />
 **Reference**: http://en.wikipedia.org/wiki/Supersampling<br />
-We add super sample anti-alisasing, which makes my render result smoother. To do this, just jitter the initial rays randomly in each iteration. 
+We add super sample anti-alisasing, which makes my render result smoother. To do this, just jitter the initial rays randomly in each iteration. <br />
+
+(SSAA comparison: right is with SSAA; 2500 iterations)<br/>
+![Alt text]()
+<br /><br />
 
 - Subsurface scattering (Fake)<br />
 **Reference**: https://machinesdontcare.wordpress.com/tag/subsurface/<br />
-We use a fakery way to implement subsurface scattering.
+We use a fakery way to implement subsurface scattering.<br />
+We can see that light is scattered by interacting with the transparent sphere.<br />
+
+(Subsurface Scatering comparison: right is with subsurface scattering; 2500 iterations with SSAA)<br/>
+![Alt text]()
+<br /><br />
 
 - Utility functions<br />
 **Reference**: https://github.com/toji/gl-matrix<br />
@@ -123,13 +132,13 @@ Scene size: 800 X 800
 
 Thrid Party Code
 -------------------------------------------------------------------------------
-* stas.js  
-It's a library to visualize realize fps and timing.  
+* stas.js:<br />
+It's a library to visualize realize fps and timing.<br />
 https://github.com/mrdoob/stats.js/
-* dat.gui.js:  
+* dat.gui.js:<br />
 A lightweight graphical user interface for changing variables in JavaScript.<br />
 https://code.google.com/p/dat-gui/
-* gl-matrix.js:
+* gl-matrix.js:<br />
 Javascript Matrix and Vector library for High Performance WebGL apps.<br />
 https://github.com/toji/gl-matrix<br /><br />
 
