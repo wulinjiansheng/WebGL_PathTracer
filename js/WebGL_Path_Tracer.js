@@ -75,8 +75,9 @@ function runGL() {
 	document.getElementById("time").innerHTML +=  "Initialize WebGL: " + (end-begin).toString() + " ms<br/>";
 	
 	begin = end;
-	initBuffers();
 	initializeShader();
+	initBuffers();
+	
 	end = Date.now();
 	document.getElementById("time").innerHTML +=  "Initialize Shader: " + (end-begin).toString() + " ms<br/>";
 	
