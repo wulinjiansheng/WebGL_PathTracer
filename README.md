@@ -150,6 +150,13 @@ Javascript Matrix and Vector library for High Performance WebGL apps.<br />
 https://github.com/toji/gl-matrix<br /><br />
 
 
-Install and build instructions
+Install and Build Instructions
 -------------------------------------------------------------------------------
 Run well on Windows Chrome and Firefox browser.
+
+Future Work
+-------------------------------------------------------------------------------
+- Phyisically based Subsurface Scattering
+- Texturemap, bumpmap
+- Make the project more robustic
+
