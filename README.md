@@ -24,7 +24,7 @@ Demo
 -------------------
 Website: [WebGL PathTracer](http://wulinjiansheng.github.io/WebGL_PathTracer/)<br/>
 Video: <br/ >
-[![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/cover.jpg)](http://youtu.be/Hm6VyPIbKP0)
+[![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/cover.jpg)](http://youtu.be/Hm6VyPIbKP0)<br/ >
 Slide: https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Final%20Presentation.pdf
 Screenshots
 -------------------
