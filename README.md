@@ -23,9 +23,11 @@ In this project, we implement a WebGL version path-tracer. Most of computation o
 Demo
 -------------------
 Website: [WebGL PathTracer](http://wulinjiansheng.github.io/WebGL_PathTracer/)<br/>
-Video: <br/ >
-[![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/cover.jpg)](http://youtu.be/Hm6VyPIbKP0)<br/ >
+Video: \
+[![Alt text](https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Pics/cover.jpg)](http://youtu.be/Hm6VyPIbKP0)
+\
 Slide: https://github.com/wulinjiansheng/WebGL_PathTracer/blob/master/Final%20Presentation.pdf
+
 Screenshots
 -------------------
 #### Final Result(5000 iterations):
